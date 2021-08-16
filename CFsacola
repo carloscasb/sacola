@@ -1,0 +1,4055 @@
+------INSTALAÇÂO------
+
+
+BAIXAR E INSTALAR O WAMP64 
+BAIXAR o COMPOSER e INSTALAR --- Indicar diretório certo PHP dentro do diretorio certo quando pergunat pelo diretorio do php
+
+-----FAZ A INSTALAÇÂO DO LARAVEL
+C:\wamp64\www>composer global require laravel/installer
+C:\wamp64\www>composer create-project --prefer-dist laravel/laravel novo
+
+---FAZER MODELAGEM DO BANCO DE DADOS
+Produto vai ter vinculado apenas 1 categoria
+usuario relcionamneto com ENDEREÇO
+itensPedido vai ter referencia do produto
+
+1---------ACESSORIOS ------------------
+
+https://github.com/tutorialesvirtuales/Curso-Laravel
+https://github.com/jeroennoten/Laravel-AdminLTE
+fontawesone.io
+
+
+
+-------------------PROBLEMAS
+# composer dump-autoload
+# php artisan migrate:refresh
+php artisan migrate:fresh
+composer dump-autoload
+
+2----CRIA PROJETO sacola no cmd (prompt)--------------------------
+
+C:\Users\barbosa>cd\
+
+C:\>cd wamp64\www\
+
+C:\wamp64\www>composer create-project --prefer-dist laravel/laravel sacola
+
+
+
+3---------------CRIA ARQUIVO BAT-- > (faz um bloco de nota e salva com extensão .bat
+cd\
+cd wamp64\www\sacola
+php artisan serve
+------------------------------------------------------------------------------
+
+----------------JA QUE VAMOS USAR O User PADRÃO VAMOS EM app\Provider\AppServiceProvider  
+-------FAÇA ISSSO , É IMPORTANTE
+
+use Illuminate\Support\Facades\Schema;
+
+/////
+public function boot()
+    {
+        Schema::defaultStringLength(191);
+    }
+
+
+
+-------------------------------------------------------------------INICIO
+
+
+
+
+4----------------------------------------------------------------------------
+PROJETO CRIADO VAMOS EM ENV
+APP_NAME=sacola
+APP_ENV=local
+APP_KEY=base64:VfcP69XYlAsaQO98KRosm53d4RBJoyYvFhlqKTZocLo=
+APP_DEBUG=true
+APP_URL=http://sacola.teste
+
+LOG_CHANNEL=stack
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sacola
+DB_USERNAME=carlos
+DB_PASSWORD=casb
+
+----------------------------------------------------------------------------
+DEPOIS EM config\app.php
+ 'timezone' => 'America/Sao_Paulo',
+----------------------------------------------------------------------------
+CRIAR NOSSO DIRETORIO DE MODELS em app e ARRASTA O User.php PARA DENTRO MUDANDO O NAMESPACE
+namespace App\Models;
+----------------------------------------------------------------------------
+VAMOS EM config\auth.php e atualizamos o namespace do models User 
+        'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
+----------------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------------
+5----------------------------------------------------------------------------AdminLT3
+OBSERVAÇÃO : TIVE QUE BAIXAR O COMPOSER 2 no site oficial, instalar no PC e FAZER A ATUALIZAÇÂO
+# composer update jeroennoten/laravel-adminlte
+----------AI PULEI para linha de instalação 93 (php artisan adminlte:install) pelo terminal ...DEU CERTO
+---------------------------------------------------
+
+
+VAMOS USAR O PACOTE AdminLT3 ENCONTAMOS NO LINK ABAIXO
+AdminLTE Laravel: https://github.com/jeroennoten/Laravel-AdminLTE
+
+INSTALAR O PACOTE VIA TERMINAL
+# composer require jeroennoten/laravel-adminlte
+E DEPOIS CONFERE A INSTALAÇÂO DEFINITIVA
+# php artisan adminlte:install
+
+MODIFICOU ALGUNAS COISA NO NOSSO PROJETO, PRINCIPALMENTE A CRIAÇÂO DE Vendor NO NOSSO DIRETORIO Public (DE TERCEIROS)
+EM Config ELE JA COLOCA UMA PASTA AdminLTE e em Resource\vendor\adminLte ja colocou os idiomas ETC...(lang)
+----------------------------------------------------------------------------
+VAMOS EM config\adminlte.php E DEFINIMOS NOSSO TEMPALTE CONFORME VONTADE ..exemplo
+ 'title' => 'sacola',
+    'title_prefix' => '',
+    'title_postfix' => '',
+-----------
+ 'logo' => '<b>sacola</b>LTE',
+    'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+    'logo_img_class' => 'brand-image img-circle elevation-3',
+    'logo_img_xl' => null,
+    'logo_img_xl_class' => 'brand-image-xs',
+    'logo_img_alt' => 'sacola',
+
+ -----------------------------------
+ MAIS O MAIS IMPRTANTE É A PARTE DE MENU e SUBMENU (ONDE TRABALHAMOS COM MENU DO DASHBOARD)
+ VAMOS MEXER COM O DESEVOLVIMENTO DO PROJETO
+
+    'menu' => [
+        [
+            'text' => 'search',
+            'search' => true,
+            'topnav' => true,
+        ],
+        [
+            'text' => 'blog',
+            'url'  => 'admin/blog',
+            'can'  => 'manage-blog',
+        ],
+        [
+            'text'        => 'pages',
+            'url'         => 'admin/pages',
+            'icon'        => 'far fa-fw fa-file',
+            'label'       => 4,
+            'label_color' => 'success',
+-----------------------------------
+
+SE DESEJAR CUSTOMIZAR AS views ----- NAO FIZ (NAO RODEI)
+
+# php artisan adminlte:install --only=main_views
+-----------------------------------------------------------------------------------
+
+
+
+
+--------------------------------------------VAMOS TRABALHAR--FAZER AS MODELS JA COM AS MIGRATION--------------------------------
+
+
+6--------------CRIAR GERAL---------------------------------VAMOS TRABALHAR--FAZER AS MODELS JA COM AS MIGRATION
+# php artisan make:model Models\Geral -mc --resource 
+# php artisan make:model Models\Geral -m  --------------------------------USEI ESSA (MAS A DE CIMA PRETENDO)
+CRIOU A MODEL Geral E A MIGRATION Geral  
+VAMOS EM NIGATTION geral e DEFININOS AS COLUNAS DE NOSSA TABELA
+  public function up()
+    {
+        Schema::create('gerals', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name')->unique();
+            $table->string('url')->unique();
+            $table->double('price' , 10, 2);
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+    }
+-------------------------------------------------------
+ E NA MODELS GERAL DEFININOS NOSSO fillable (permisao de dados no BD)
+ class Geral extends Model
+{
+    protected $fillable = ['name', 'url', 'price', 'description'];
+}
+
+7-------------------------------------CRIAR BD------------------------------------------------
+NESSE MOMENTO VAMOS CRIAR UM BD NO phpadmin COM o NOME DE sacola RECOMEDADO utf8mb4_unicode_ci
+
+---------------------------
+8------------------------------------CRIAR TABELAS------------------------------------------------
+NO TERMINAL 
+# php artisan migrate          USEI ESSA   ----
+
+
+
+# php artisan make:migration create_gerals_table    QUANDO FOR ESPECIFICA
+
+------------------------------------------------------------------------GEROU AS 4 TABELAS
+
+-----VAMOS CONTINUAR---------------------------------------- !!!
+
+9------------PRIMEIRAMENTE VAMOS CRIAR UM SEEDER User
+# php artisan make:seeder UsersTableSeeder
+E CODIFICAR , NAO ESQUECER O ---use App\Models\User; LA EM CIMA (pois mudamos o namespace de user para dentro da MODELS)
+<?php
+
+use Illuminate\Database\Seeder;
+use App\Models\User; 
+class UsersTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        User::Create([
+            'name' => 'carlos',
+            'email' => 'carlos@gmail.com',
+            'password' => bcrypt('casb'),
+        ]);
+    }
+    
+}
+
+-----NAO ESQUECER O ---use App\Models\User; LA EM CIMA
+---------EM DATABASEEDER LIBERE O THIS
+public function run()
+    {
+        $this->call(UsersTableSeeder::class);
+        
+    }
+}
+
+-----RODAR SEEDER PARA POPULAR A TELA User
+# php artisan db:seed -----------------------------RODEI ESSE
+
+# php artisan db:seed --class=UsersTableSeeder
+
+-------------------------------------------------------------------POPULOU A TABRELA User 
+
+10------------------CRIAR AS ROTAS-----------------------------------
+--INICIALMENTE FAREMOS UMA POR UMA-------
+--Antes recomendado criar o GeralController --(nesse caso que ainda nao criamos os Metodos, quando for criado a model tipo ressouse ja fica criado)
+com vai ficar no diretorio Admin colocamos o namespace
+
+# php artisan make:controller Admin\GeralController
+
+CRIA Admin\GeralController FALTANDO PREENCHER SEUS METODOS
+class GeralController extends Controller
+{
+    public function index()
+            {
+            return view('admin.pages.gerals.index');
+        }
+}
+    
+
+-----FAZ OU LIBERE A ROUTER EM WEB.php  ----- (PODERIA SER Resource)
+Route::get('/admin/gerals', 'Admin\GeralController@index')->name('gerals.index');
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+----------------E VAMOS CRIAR A View index em Resource\views\admin\pages\gerals
+
+----------------------PEGA O 4. Usage DO AdminLTE E COLOCA (NA DOCUMENTAÇÃO)
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+    <h1>Dashboard</h1>
+@stop
+
+@section('content')
+    <p>Welcome to this beautiful admin panel.</p>
+@stop
+
+------------------------------------------ OK PERFEITO  A PAGINA index JA ESTA FUNCIONANDO COM A ROUTER (http://127.0.0.1:8000/admin/gerals)
+11----------------------------COMEÇAR A CONFIGURA OAdminLTE - Dashboard ------------------
+Vamos em Config\AdminLT3.php
+menu' => [
+        [
+            'text' => 'search',
+            'search' => true,
+            'topnav' => true,
+        ],
+        [
+            'text' => 'pessoas',
+            'url'  => 'admin/gerals',
+            
+        ],
+
+
+ OU DEIXAR ASSIM -------FICOU COMO ABAIXO (PODE TIRAR O Menu)       
+
+ 'menu' => [
+        // Navbar items:
+        [
+            'type'         => 'navbar-search',
+            'text'         => 'search',
+            'topnav_right' => true,
+        ],
+        [
+            'type'         => 'fullscreen-widget',
+            'topnav_right' => true,
+        ],
+
+        // Sidebar items:
+        [
+            'type' => 'sidebar-menu-search',
+            'text' => 'search',
+        ],
+        [
+            'text' => 'blog',
+            'url'  => 'admin/blog',
+            'can'  => 'manage-blog',
+        ],
+        [
+            'text'        => 'geral',
+            'url'         => 'admin/gerals',
+            'icon'        => 'far fa-fw fa-file',
+            
+        ],
+        
+        [
+            'text' => 'pessoas',
+            'url'  => 'admin/settings',
+            'icon' => 'fas fa-fw fa-user',
+        ],
+        
+        
+    ],
+
+12----------------- VAMOS PARA O MODULO PESSOA (fazer realmente os metodos do CRUD)----------
+
+----------COMEÇANDO PELO NOSSA MODEL E MIGRATION 
+
+# php artisan make:model Models\Pessoa -m -----USEI ESSA
+
+# php artisan make:model Models\Pessoa -mc --resource  --(Poderia ser essa pois vem o CONTOLLER com os metodos )
+
+---NA MIGRATION VOCE TEM QUE SABER PERFEITAMENTE OS CAMPOS QUE A TABELA VAI TER 
+   public function up()
+    {
+        Schema::create('pessoas', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name')->required();
+            $table->string('url')->unique();
+            $table->string('vulgo')->required();
+            $table->string('mae')->nullable();
+            $table->string('genero')->nullable();
+            $table->string('rg')->unique();
+            $table->string('exp')->nullable();
+            $table->string('cpf')->unique();
+            $table->string('titulo')->unique();
+            $table->string('natural')->nullable();
+            $table->string('nacionalidade')->nullable();
+            $table->string('nascimeto')->nullable();
+            $table->string('description')->nullable();
+            $table->timestamps();
+            
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('pessoas');
+    }
+}
+
+
+-------------------NA MODEL 
+
+class Pessoa extends Model
+{
+    //
+    protected $fillable = ['name', 'url', 'vulgo', 'mae', 'genero', 'registro', 'expedidor', 'cpf', 'titulo', 'natural', 'nacionalidade', 'nascimeto',  'description'];
+}
+
+13 - RODAR MIGRATE PARA CRIAR NOSSA TABELA pessoas  NO BD 
+
+# php artisan migrate
+
+-------------------------ok perfeito criou a tabela pessoas e tambem a tabela pessoas (não usaremos) no BD
+
+14------CRIAR O CONTROLLER PessoaController ---AQUI VAMOS APENAS FAZER TESTE PARA DEPOIS OTIMIZAR NOSSO CRUD
+
+# php artisan make:controller Admin\PessoaController  -- CRIA Admin\pessoaController FALTANDO PREENCHER SEUS METODOS
+
+# php artisan make:controller Admin\PessoaController --resource ---USEI ESSE (com SEUS METODOS)
+
+
+--------------------------------------------------------SE LOCALIZAR 
+class PessoaController extends Controller
+{
+    public function index()
+            {
+            return view('admin.pages.pessoas.index');
+        }
+}
+    
+------------APENAS PARA SE LOCALIZAR
+ 
+
+15-------CRIAR E LIBERE A ROUTER EM WEB.php (tipo resource)
+//EWRIRADA DE PERFIXOS DAS ROTAS
+
+Route::prefix('admin')
+        ->namespace('Admin')
+         //->middleware('auth')
+        ->group(function() {
+            
+//ROTA PESSOAL (tipo resource)
+Route::resource('pessoas', 'PessoaController');
+
+//Route::resource('pessoas', 'PessoaController');
+
+});
+
+
+//ROTA PESSOAL (rotas de testes, dando certo)
+//Route::resource('/admin/pessoas', 'Admin\PessoaController');
+//Route::get('/admin/pessoas', 'Admin\PessoaController@index')->name('pessoas.index');
+
+//ROTA GERAL
+
+Route::get('/admin/gerals', 'Admin\GeralController@index')->name('gerals.index');
+
+//ROTA INICIAL
+Route::get('/', function () {
+    return view('welcome');
+});
+
+16----------------E VAMOS CRIAR A View index em Resource\views\admin\pages\pessoas
+
+----------------------PEGA O 4. Usage DO AdminLTE E COLOCA (NA DOCUMENTAÇÃO)
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+    <h1>Dashboard</h1>
+@stop
+
+@section('content')
+    <p>Welcome to this beautiful admin panel.</p>
+@stop
+------------------------------------------   A PAGINA index JA ESTA FUNCIONANDO COM A ROUTER
+--------------VAMOS ESTILIZAR A PAGINA index
+@extends('adminlte::page')
+
+@section('title', 'pessoaos')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Perfis</a></li>
+    </ol>
+<h1>pessoaOS</h1>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-header">
+                #filtross
+
+                </div>
+        <div class="card-body">
+
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                     <th style="width: 50px">Ação</th>
+
+                </tr>
+
+            </thead>
+            <body>
+               
+            </body>
+        </table>
+       
+    
+                </div>
+            </div>
+
+@stop
+
+
+----------------------ATE AQUI FOI TESTE NA index , DANDO CERTO
+
+17------------------------------------- VAMOS LISTAR NOSSOS pessoas (fazer realmente os metodos do CRUD)-----------------------
+
+----CODIFICANDO NOSSO CONTROLLER PessoaController, view e model -  ja foi feita parcialmente
+
+------------- vamos trabalhar com CONTROLLER PessoaController
+
+----NO PessoaContoller FARENOS UM __CONSTRUTOR ---CRIAMOS UM 
+Atributo repository PEGAR NOSSO OBJETO Pessoa e JOGAR NA VARIAVEL $pessoa , E NOSSO ATRIBUTO repository RECEBE UM OBJETO DE pessoa
+ARMAZENADA NA VARIAVEL $pessoa
+METODO INDEX--Numa VARIAVEL $pessoas VOU RECUPERAR TODOS o REPOSITIRO (do atributo repository) E PASSAR PARA NOSSA View (poderia ser por conpact)
+Não ESQUECER De DECLARAR A variaveis  $pessoas la em cima
+@
+ namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use App\Models\Pessoa;
+
+class PessoaController extends Controller
+{
+ 
+    // CONSTRUIR UM CONSTRUTOR
+
+    Protected $repository;
+
+    public function __construct(Pessoa $pessoa)
+    {
+        $this->repository = $pessoa;
+
+    //  $this->middleware(['can:pessoas']);
+    }
+ 
+    
+    public function index()
+    {
+        
+        $pessoas = $this->repository->all();
+        return view('admin.pages.pessoas.index', [
+            'pessoas' => $pessoas,
+            ]);
+    }
+
+
+------COMO O CONTRUCTOR FOI USADO PESSOAS FAREMOS REFERENCIA A MODEL PESSOA EM CIMA DA PAGINA
+
+namespace App\Http\Controllers\Admin;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Pessoa;
+
+------E AGORA PARA LISTAR OS pessoas NA views (admin.pages.pessoas.index) FAZ UM foreach NA view ja estilizada
+@extends('adminlte::page')
+
+@section('title', 'pessoaos')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Perfis</a></li>
+    </ol>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-header">
+                #filtross
+
+                </div>
+        <div class="card-body">
+
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                     <th style="width: 50px">Ação</th>
+
+                </tr>
+
+            </thead>
+            <body>
+                @foreach($pessoas as $pessoa)
+                 <tr>
+                    <td>{{ $pessoa->name }}</td>
+                    <td>{{ $pessoa->cpf }}</td>
+                    <td>
+                    <a href="url" class="btn btn-warning">Detalhe</a>
+                    </td>
+                    </tr>
+                @endforeach
+            </body>
+        </table>
+       
+    
+                </div>
+            </div>
+
+@stop
+---------------------------------------------Não VAI APARECER REGISTRO POIS NOSSO BD ESTA VAZIO
+-------------PODEMOS PREENCHER MANUALEMENTE SOMENTE PARA VISUALIZAR ---NÃO FAREI ISSO
+
+---------------------------------------------------------VAMOS PAGINAR
+VAI EM pessoaController e troca all por paginate SEGUIDO PELO NUMERO DE REGISTRO POR PAGINA, O PADRAO È 15
+public function index()
+        {
+                $pessoas = $this->repository->paginate(1);
+            return view('admin.pages.pessoas.index', [
+                'pessoas' => $pessoas,
+                ]);
+        }
+
+
+
+----------VAI NA View index e acrecentar NO FINAL UMA div CONTENDO A NOSSA PAGINAÇÂO
+
+      </tr>
+                @endforeach
+            </body>
+        </table>
+       
+    
+                </div>
+            </div>
+
+            <div class="card-footer">
+                {!! $pessoas->links() !!}
+            </div>
+
+@stop
+
+----------------------------------VAMOS DEIXAR DEFAULD E DO REGITRO DO MAIS ANTIGO PAR O MAIS NOVO, METODO Latext
+public function index()
+        {
+                $pessoas = $this->repository->latest()->paginate();
+            return view('admin.pages.pessoas.index', [
+                'pessoas' => $pessoas,
+                ]);
+        }
+}
+
+ATENÇÂO : NO FINAL RESOLVIR DEIXAR O METODO index DO pessoasContoller COMO ABAIXO:
+
+public function index()
+    {
+        $pessoas = $this->repository->latest()->paginate();
+
+        return view('admin.pages.pessoas.index', compact('pessoas'));
+    }
+
+
+
+18-----------------VAMOS FAZER UM PARENTESES E CRIAR NOSSOS ALERTAS (alerts) -
+ DENTRO DE resource\view\admin\includes\alerts.blade.php
+
+@if ($errors->any())
+    <div class="alert alert-warning">
+        @foreach ($errors->all() as $error)
+            <p>{{ $error }}</p>
+        @endforeach
+    </div>
+@endif
+
+@if (session('message'))
+    <div class="alert alert-success">
+        {{ session('message') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
+@if (session('info'))
+    <div class="alert alert-warning">
+        {{ session('info') }}
+    </div>
+@endif
+
+
+19--------------INSERIR REGISTRO EM PessoaCADASTRAR NOVO Pessoa---CRIAMOS UM BOTAO DE ADD NO INICIO DA PAGINA index
+
+@extends('adminlte::page')
+
+@section('title', 'Pessoa')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Perfis</a></li>
+    </ol>
+<a href="{{route('pessoas.create')}}" class="btn btn-dark">CADASTRAR PESSOAS</a>
+@stop
+
+-----------------------------------------------------------
+------E VAMOS CRIAR NOSSA View de Create com FORMULARIO DE CADASTRO E @csrf (quando for 
+criar e ou edit tem que ter  a diretriza @csrf)
+
+@extends('adminlte::page')
+
+@section('title', 'Cadastrando Nova Pessoa')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+<h1>Cadastrando Nova Pessoa  </h1>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-body">
+            <form action="{{route('pessoas.store')}}" class="form" method="POST" >
+@csrf
+@include('admin.includes.alerts')
+
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Nome</label>
+      <input class="form-control" type="text" name="name" placeholder="name" value=" {{$pessoa->name ?? old('name')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Vulgo</label>
+      <input type="text" class="form-control" name="vulgo" placeholder="vulgo" value=" {{$pessoa->vulgo ?? old('vulgo')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Mãe</label>
+      <input class="form-control" type="text" name="mae" placeholder="mae" value=" {{$pessoa->mae ?? old('mae')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Nascimento</label>
+      <input type="text" class="form-control" name="nasc" placeholder="DLL" value=" {{$pessoa->nascimeto ?? old('nascimeto')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> RG - Identidade</label>
+      <input class="form-control" type="text" name="rg"  value=" {{$pessoa->rg ?? old('rg')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Expedidor</label>
+      <input type="text" class="form-control" name="exp" placeholder="DLL" value=" {{$pessoa->exp ?? old('exp')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="inputCity">CPF</label>
+      <input type="text" class="form-control" name="cpf" placeholder="cpf" value=" {{$pessoa->cpf ?? old('cpf')}} ">
+    </div>
+    <div class="form-group col-md-3">
+      <label >Genero</label>
+      <select id="inputState" class="form-control" name="genero" placeholder="genero" value=" {{$pessoa->genero ?? old('genero')}} ">>
+        <option selected>Choose...</option>
+        <option>Masculino</option>
+        <option>Feminino</option>
+      </select>
+    </div>
+    <div class="form-group col-md-2">
+      <label for="inputCity">Titúlo</label>
+      <input type="text" class="form-control" name="titulo" placeholder="titulo" value=" {{$pessoa->titulo ?? old('titulo')}} ">
+    </div>
+    </div>
+    <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Naturalidade</label>
+      <input class="form-control" type="text" name="natural"  value=" {{$pessoa->natural ?? old('natural')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Nacionalidade</label>
+      <input type="text" class="form-control" name="nacionalidade" placeholder="nacionalidade" value=" {{$pessoa->nacionalidade ?? old('nacionalidade')}} ">
+    </div>
+    </div>
+
+  <div class="form-group">
+    <label for="inputAddress">Address</label>
+    <textarea type="text" class="form-control" id="inputAddress" placeholder="1234 Main St"></textarea>
+  </div>
+  
+  
+  
+  <button type="submit" class="btn btn-primary">CADASTRAR PESSOAS in</button>
+
+</form>
+
+
+</div>
+</div>
+
+
+@endsection  
+------------------------------------TESTAR (Deve vim vazia sem acusar erro)
+
+
+-------------------------------------vamos CRIAR O METODO create e store em PessoaController
+------- NETODO CREATE - somente testar router
+//public function create(Request $request) ---NOTE QUE TIREI OS Request
+
+/**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('admin.pages.pessoas.create');
+    }
+
+---------------------------TESTAR (Deve vim cheia sem erro)
+
+
+-------------------- O METODO STORE (quem vai realmente cadastra) PODE SER ASSIM, mais dessa forma daria 
+um erro pois colocamos no Fillable da model o CAMPO 'url", que ainda nao temos, mas podemos CORRIGIR COM O item 19.1
+ public function store(Request $request)
+        {
+
+            $this->repository->create($request->all());
+            return redirect ()-> route('pessoas.index');
+        }
+
+        
+
+19.1----------------------------------O STORE PODERIA SER ASSIM  ESSE com uma VARIAVEL $data e usando 
+o KEBAB (que pega no endereco da url o request name), para isso DEFININOS  A CLASSE NO INICIO (ACIMA) ---FIZ
+COMO MOSTRAR O ITEM 19.2
+use Illuminate\Support\Str;
+ public function store(Request $request)
+        {
+            $data = $request->all();
+            $data['url']= Str::kebab($request->name);
+            $this->repository->create($data);
+            return redirect ()-> route('pessoas.index');
+        }
+
+
+
+
+19.2 ---ATENÇÃO --FICOU ASSIM O METODO store DO pessoaController
+/**
+     * Store a newly created resource in storage.
+     *
+     * @param  \App\Http\Requests\StoreUpdatePessoa$request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+       
+        $data = $request->all();
+        $data['url']= Str::kebab($request->name);
+        
+
+        $this->repository->create($data);
+
+        return redirect()->route('pessoas.index');
+    }
+
+
+
+---------------Confere o fillable na MODEL pessoas
+  protected $fillable = ['name', 'url', 'vulgo', 'mae', 'genero', 'rg', 'exp', 'cpf', 'titulo', 'natural', 'nacionalidade', 'nascimeto',  'description'];
+--------------------------------------------------------------------------OK...PRONTO TESTAR ( VIEW create FICOU ASSIM )
+
+@extends('adminlte::page')
+
+@section('title', 'Cadastrando Nova Pessoa')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+<h1>Cadastrando Nova Pessoa  </h1>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-body">
+            <form action="{{route('pessoas.store')}}" class="form" method="POST" >
+@csrf
+@include('admin.includes.alerts')
+
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Nome</label>
+      <input class="form-control" type="text" name="name" placeholder="name" value=" {{$pessoa->name ?? old('name')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Vulgo</label>
+      <input type="text" class="form-control" name="vulgo" placeholder="vulgo" value=" {{$pessoa->vulgo ?? old('vulgo')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Mãe</label>
+      <input class="form-control" type="text" name="mae" placeholder="mae" value=" {{$pessoa->mae ?? old('mae')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Nascimento</label>
+      <input type="text" class="form-control" name="nasc" placeholder="DLL" value=" {{$pessoa->nascimeto ?? old('nascimeto')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> RG - Identidade</label>
+      <input class="form-control" type="text" name="rg"  value=" {{$pessoa->rg ?? old('rg')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Expedidor</label>
+      <input type="text" class="form-control" name="exp" placeholder="DLL" value=" {{$pessoa->exp ?? old('exp')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="inputCity">CPF</label>
+      <input type="text" class="form-control" name="cpf" placeholder="cpf" value=" {{$pessoa->cpf ?? old('cpf')}} ">
+    </div>
+    <div class="form-group col-md-3">
+      <label >Genero</label>
+      <select id="inputState" class="form-control" name="genero" placeholder="genero" value=" {{$pessoa->genero ?? old('genero')}} ">>
+        <option selected>Choose...</option>
+        <option>Masculino</option>
+        <option>Feminino</option>
+      </select>
+    </div>
+    <div class="form-group col-md-2">
+      <label for="inputCity">Titúlo</label>
+      <input type="text" class="form-control" name="titulo" placeholder="titulo" value=" {{$pessoa->titulo ?? old('titulo')}} ">
+    </div>
+    </div>
+    <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Naturalidade</label>
+      <input class="form-control" type="text" name="natural"  value=" {{$pessoa->natural ?? old('natural')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Nacionalidade</label>
+      <input type="text" class="form-control" name="nacionalidade" placeholder="nacionalidade" value=" {{$pessoa->nacionalidade ?? old('nacionalidade')}} ">
+    </div>
+    </div>
+
+  <div class="form-group">
+    <label for="inputAddress">Address</label>
+    <textarea type="text" class="form-control" id="inputAddress" placeholder="1234 Main St"></textarea>
+  </div>
+  
+  
+  
+  <button type="submit" class="btn btn-primary">CADASTRAR PESSOAS in</button>
+
+</form>
+
+
+</div>
+</div>
+
+
+@endsection  
+
+------------------------------OK PERFEITO CADASTROU E EXIBIU pelo url (ficou o link VER)
+NOSSA PAGINAS FICARAM ASSIM ;
+
+-------ViEW pessoa index 
+@extends('adminlte::page')
+
+@section('title', 'pessoaos')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+    <a href="{{route('pessoas.create')}}" class="btn btn-dark">CADASTRAR PESSOAS</a>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-header">
+                #filtross
+
+                </div>
+        <div class="card-body">
+
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                     <th style="width: 50px">Ação</th>
+
+                </tr>
+
+            </thead>
+            <body>
+            @foreach($pessoas as $pessoa)
+                 <tr>
+                    <td>{{ $pessoa->name }}</td>
+                    <td>{{ $pessoa->cpf }}</td>
+                    <td>
+                    <a href="{{ route('pessoas.edit', $pessoa->id) }}" class="btn btn-warning">Editar</a>
+                    <a href="{{ route('pessoas.show', $pessoa->id) }}" class="btn btn-secondary">ver</a>
+                    </td>
+                    </tr>
+                    @endforeach
+            </body>
+        </table>
+       
+    
+                </div>
+            </div>
+
+            <div class="card-footer">
+                {!! $pessoas->links() !!}
+            </div>
+
+@stop
+
+----  View Create
+
+@extends('adminlte::page')
+
+@section('title', 'Cadastrando Nova Pessoa')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+<h1>Cadastrando Nova Pessoa  </h1>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-body">
+            <form action="{{route('pessoas.store')}}" class="form" method="POST" >
+@csrf
+@include('admin.includes.alerts')
+
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Nome</label>
+      <input class="form-control" type="text" name="name" placeholder="name" value=" {{$pessoa->name ?? old('name')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Vulgo</label>
+      <input type="text" class="form-control" name="vulgo" placeholder="vulgo" value=" {{$pessoa->vulgo ?? old('vulgo')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Mãe</label>
+      <input class="form-control" type="text" name="mae" placeholder="mae" value=" {{$pessoa->mae ?? old('mae')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Nascimento</label>
+      <input type="text" class="form-control" name="nasc" placeholder="DLL" value=" {{$pessoa->nascimeto ?? old('nascimeto')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> RG - Identidade</label>
+      <input class="form-control" type="text" name="rg"  value=" {{$pessoa->rg ?? old('rg')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Expedidor</label>
+      <input type="text" class="form-control" name="exp" placeholder="DLL" value=" {{$pessoa->exp ?? old('exp')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="inputCity">CPF</label>
+      <input type="text" class="form-control" name="cpf" placeholder="cpf" value=" {{$pessoa->cpf ?? old('cpf')}} ">
+    </div>
+    <div class="form-group col-md-3">
+      <label >Genero</label>
+      <select id="inputState" class="form-control" name="genero" placeholder="genero" value=" {{$pessoa->genero ?? old('genero')}} ">>
+        <option selected>Choose...</option>
+        <option>Masculino</option>
+        <option>Feminino</option>
+      </select>
+    </div>
+    <div class="form-group col-md-2">
+      <label for="inputCity">Titúlo</label>
+      <input type="text" class="form-control" name="titulo" placeholder="titulo" value=" {{$pessoa->titulo ?? old('titulo')}} ">
+    </div>
+    </div>
+    <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Naturalidade</label>
+      <input class="form-control" type="text" name="natural"  value=" {{$pessoa->natural ?? old('natural')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Nacionalidade</label>
+      <input type="text" class="form-control" name="nacionalidade" placeholder="nacionalidade" value=" {{$pessoa->nacionalidade ?? old('nacionalidade')}} ">
+    </div>
+    </div>
+
+  <div class="form-group">
+    <label for="inputAddress">Address</label>
+    <textarea type="text" class="form-control" id="inputAddress" placeholder="1234 Main St"></textarea>
+  </div>
+  
+  
+  
+  <button type="submit" class="btn btn-primary">CADASTRAR PESSOAS in</button>
+
+</form>
+
+
+</div>
+</div>
+
+
+@endsection  
+
+                               
+-------ViEW Show 
+
+@extends('adminlte::page')
+
+@section('title', "DETALHE Pessoa  {$pessoa->name} ")
+
+@section('content_header')
+<h1>Detalhe do Palno <b>{{ $pessoa->name }}</b>  </h1>
+
+@stop
+
+@section('content')
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+
+            <div class="card">
+            <div class="card-body">
+            <ul>
+            <li>
+            <strong>NOME</strong> {{ $pessoa->name }}
+            </li>
+            <li>
+            <strong>Url</strong> {{ $pessoa->url }}
+            </li>
+           
+            <li>
+            <strong>DESCRIÇÂO</strong> {{ $pessoa->description }}
+            </li>
+            </ul>
+            </div>
+            </div>
+            @endsection
+
+-----------pessoasCONTROLLER
+<?php
+
+namespace App\Http\Controllers\Admin;
+use Illuminate\Support\Str;
+use App\Http\Controllers\Controller;
+use App\Models\Pessoause Illuminate\Http\Request;
+
+class PessoaController extends Controller
+{
+    //
+    private $repository;
+
+    public function __construct(Pessoapessoa)
+    {
+        $this->repository = $pessoa;
+
+      //  $this->middleware(['can:pessoas']);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $pessoas = $this->repository->latest()->paginate(5);
+
+        return view('admin.pages.pessoas.index', compact('pessoas'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('admin.pages.pessoas.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \App\Http\Requests\StoreUpdatePessoa$request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+       
+        $data = $request->all();
+        $data['url']= Str::kebab($request->name);
+        
+
+        $this->repository->create($data);
+
+        return redirect()->route('pessoas.index');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        if (!$pessoa = $this->repository->find($id)) {
+            return redirect()->back();
+        }
+
+        return view('admin.pages.pessoas.show', compact('pessoa'));
+    }
+
+    
+
+}
+
+
+-------router
+
+<?php
+
+//EWRIRADA DE PERFIXOS DAS ROTAS
+
+Route::prefix('admin')
+        ->namespace('Admin')
+         //->middleware('auth')
+        ->group(function() {
+            
+//ROTA PESSOAL (tipo resource)
+Route::resource('pessoas', 'PessoaController');
+
+
+
+});
+
+
+//ROTA PESSOAL (rotas de testes, dando certo)
+//Route::resource('/admin/pessoas', 'Admin\PessoaController');
+//Route::get('/admin/pessoas', 'Admin\PessoaController@index')->name('pessoas.index');
+
+//ROTA GERAL
+
+Route::get('/admin/gerals', 'Admin\GeralController@index')->name('gerals.index');
+
+//ROTA INICIAL
+Route::get('/', function () {
+    return view('welcome');
+});
+
+
+
+20----------------------------EDITAR Pessoa-
+
+---------MAQUIAGEM 
+COLOCAR UM BOTÃO AO LADO DO BOTAO VER NA view INDEX e FAZER UM LINK PARA UMA ROTA EDITAR, passando
+ID ou Url
+ @foreach($pessoas as $pessoa)
+                 <tr>
+                    <td>{{ $pessoa->name }}</td>
+                    <td>{{ $pessoa->cpf }}</td>
+                    <td>
+                    <a href="{{ route('pessoas.edit', $pessoa->id) }}" class="fas fa-edit"></a>
+                    <a href="{{ route('pessoas.show', $pessoa->id) }}" class="fas fa-fw fa-user"></a>
+                    <a href="{{ route('pessoas.show', $pessoa->id) }}" class="fas fa-trash-alt"></a>
+                    </tr>
+                    @endforeach
+------------------
+-------------FAZER NOSSA view Edit    
+NOTE QUE ESSEA View JA DEVE VIM TRAZENDO AS INFORMAÇÂO DO PessoaO DESEJADO (usar value="{{$pessoa->nome}}"), E DEVE VIM DIZENDO O METODO DE ENVIO
+(@method('PUT')) ELA VAI REPASSAR PARA O METODO UPDATE PELA id {{route('pessoas.update $pessoa->id')}}",
+PODERIA SER POR ID (MAIS FREQUENTE)
+OBSERVE QUE O MIOLHO DO CODIGO É IGUALAO DO CREATE - PODERIAMOS FAZER UMA partials\form
+
+@extends('adminlte::page')
+
+@section('title', 'Editando  Pessoa'{{$pessoa->name}} )
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+<h1>Editando  Pessoa {{$pessoa->name}} </h1>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-body">
+            <form action="{{route('pessoas.update', $pessoa->id)}}" class="form" method="POST" >
+@csrf
+@method('PUT')
+
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Nome</label>
+      <input class="form-control" type="text" name="name" placeholder="name" value=" {{$pessoa->name ?? old('name')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Vulgo</label>
+      <input type="text" class="form-control" name="vulgo" placeholder="vulgo" value=" {{$pessoa->vulgo ?? old('vulgo')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Mãe</label>
+      <input class="form-control" type="text" name="mae" placeholder="mae" value=" {{$pessoa->mae ?? old('mae')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Nascimento</label>
+      <input type="text" class="form-control" name="nasc" placeholder="DLL" value=" {{$pessoa->nascimeto ?? old('nascimeto')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> RG - Identidade</label>
+      <input class="form-control" type="text" name="rg"  value=" {{$pessoa->rg ?? old('rg')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Expedidor</label>
+      <input type="text" class="form-control" name="exp" placeholder="DLL" value=" {{$pessoa->exp ?? old('exp')}} ">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="inputCity">CPF</label>
+      <input type="text" class="form-control" name="cpf" placeholder="cpf" value=" {{$pessoa->cpf ?? old('cpf')}} ">
+    </div>
+    <div class="form-group col-md-3">
+      <label >Genero</label>
+      <select id="inputState" class="form-control" name="genero" placeholder="genero" value=" {{$pessoa->genero ?? old('genero')}} ">>
+        <option selected>Choose...</option>
+        <option>Masculino</option>
+        <option>Feminino</option>
+      </select>
+    </div>
+    <div class="form-group col-md-2">
+      <label for="inputCity">Titúlo</label>
+      <input type="text" class="form-control" name="titulo" placeholder="titulo" value=" {{$pessoa->titulo ?? old('titulo')}} ">
+    </div>
+    </div>
+    <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Naturalidade</label>
+      <input class="form-control" type="text" name="natural"  value=" {{$pessoa->natural ?? old('natural')}} ">
+    </div>
+    <div class="form-group col-md-6">
+      <label >Nacionalidade</label>
+      <input type="text" class="form-control" name="nacionalidade" placeholder="nacionalidade" value=" {{$pessoa->nacionalidade ?? old('nacionalidade')}} ">
+    </div>
+    </div>
+
+  <div class="form-group">
+    <label for="inputAddress">Address</label>
+    <textarea type="text" class="form-control" id="inputAddress" placeholder="1234 Main St"></textarea>
+  </div>
+  
+  
+  
+  <button type="submit" class="btn btn-primary">EDITAR PESSOAS</button>
+
+</form>
+
+
+</div>
+</div>
+
+
+@endsection  
+
+
+
+----------------CRIAR METODO EDIT e UPDATE NO PessoaSCONTROLLER
+---METODO EDITE
+   public function edit($id)
+    {
+        $pessoa = $this->repository->where('id', $id)->first();
+
+        if (!$pessoa)
+            return redirect()->back();
+
+        return view('admin.pages.pessoas.edit', [
+            'pessoa' => $pessoa
+        ]);
+    }    
+----METODO UPDATE
+    public function update(Request $request,  $id)
+    {
+        $pessoa = $this->repository->where('id', $id)->first();
+
+        if (!$pessoa)
+            return redirect()->back();
+
+        $pessoa->update($request->all());
+
+        return redirect()->route('pessoas.index');
+    }
+
+-----------------------------------------------------------------------------------OK EDITANDO
+---VOCE PODE PEGAR TUDO QUE `TIVER DE COMUM COLOCAR EM OUTROS FORMULARIOS (panels)
+CHAMANDO PELO @include NO LOCAL QUE DESEJAR
+
+21----------------DELETAR PESSOA
+ -----VAMOS FAZER USANDO A VIEW SHOW
+@extends('adminlte::page')
+
+@section('title', "DETALHE Pessoa  {$pessoa->name} ")
+
+@section('content_header')
+<h1>Detalhe do Palno <b>{{ $pessoa->name }}</b>  </h1>
+
+@stop
+
+@section('content')
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+
+            <div class="card">
+            <div class="card-body">
+            <ul>
+            <li>
+            <strong>NOME</strong> {{ $pessoa->name }}
+            </li>
+            <li>
+            <strong>Url</strong> {{ $pessoa->url }}
+            </li>
+           
+            <li>
+            <strong>DESCRIÇÂO</strong> {{ $pessoa->description }}
+            </li>
+            </ul>
+            </div>
+       <div class="car-footer">
+            <form action="{{route('pessoas.destroy', [$pessoa->id])}}" method="post">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger">Deletar  {{$pessoa->name}} </button>
+            </form>
+
+            </div>
+            </div>
+            @endsection
+
+
+
+-----NO PWSSOACONTROLLER o metodos destroy
+public function destroy($id)
+    {
+        $pessoa = $this->repository->where('id', $id)->first();
+
+        if (!$pessoa)
+            return redirect()->back();
+
+        $pessoa->delete();
+
+        return redirect()->route('pessoas.index');
+    }
+
+  
+22 ----- MISTURA
+
+23 ------COLOCAR 10 imagem no diretório public/images      
+produto1.jpg...
+
+24------ FAZER VIEW Home para substitui a index da gerals (VOU DEIXAR O MESMO NOME e caminho gerals.index.blade.php)
+
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+
+        <a href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+    </ol>
+    
+@stop
+
+@section('content')
+<div class="container">
+<div class="row"> 
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset('foto/produto1.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 1</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto2.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 2</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+
+<div class="col-3 mb-3">
+
+<div class="card">
+
+<img src="{{asset('foto/produto3.jpg' ) }}" class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 3</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto4.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 4</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto5.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 5</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto6.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 6</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto7.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 7</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset('foto/produto8.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 8</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+</div>
+    
+@stop
+
+
+
+25---CRIAR model CATEGORIAS, PRODUTOS, USUaRIO, ENDEREÇO, PEDIDO,
+E ITEM_PEDIDO com repectivas MIGRATIONS
+
+# php artisan make:model Models\Categoria -m
+# php artisan make:model Models\Produto -m
+# php artisan make:model Models\Usuario -m
+# php artisan make:model Models\Endereco -m
+# php artisan make:model Models\Pedido -m
+# php artisan make:model Models\ItensPedido -m
+
+26---VOU EM MODELS e Crio a classe RModel genereica (defalud) que conterá algunas propriedaes
+especificas que outras classe herdarão
+
+---Replica uma Models e EDITA
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class RModel extends Model
+{
+    
+
+    protected $primaryKey = "id";
+    public $timestamps = true; 
+    public $incremeting = true;
+    protected $fillable = [];
+
+
+    public function beforeSave () {
+
+        return true;
+    }
+
+    public function save (array $options = []) {
+
+        try{
+
+            if(!$this->beforeSave()) {
+
+                return false;
+            }
+
+            return parent::save($options);
+        
+        }catch (\Exception $e) {
+             throw new \Exception($e -> getMessage());
+}      
+
+    }
+
+
+}
+
+
+
+---FEITO ESSA VALIDAÇÃO 
+vou em cada Models e substitui a Herança de Model para RModel
+
+EXEMPLO---como estava
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Categoria extends Model
+{
+    use HasFactory;
+}
+
+---COMO FICA
+
+<?php
+
+namespace App\Models;
+
+class Categoria extends RModel
+{
+    
+}
+
+-----TODA FICARAM ASSIM - herdando a configuração feita na RModel
+
+
+27-----VAMOS EM DATABASE MIGRATIONS e DELETAMOS as migratiosn
+de User, passaword e falled
+
+28----E CRIAR as tabelas nas MIGRATIONS
+ --------CATEGORIAS
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateCategoriasTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('categorias', function (Blueprint $table) {
+            $table->increments("id");
+            $table->string("categoria", 100);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('categorias');
+    }
+}
+
+---PRODUTOS
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateProdutosTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('produtos', function (Blueprint $table) {
+            $table->increments("id");
+
+            $table->string("nome", 100);
+            $table->decimal("valor", 10,2);
+            $table->string("foto", 100)->nullable();
+            $table->string("descricao", 255)->nullable();
+            $table->integer("categoria_id")->unsigned;
+
+            $table->timestamps();
+            
+            $table->foreign("categoria_id")
+            ->references("id")->on("categorias")
+            ->onDelete("cascade");
+           
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('produtos');
+    }
+}
+
+ 
+--------USUARIOS
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateUsuariosTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('usuarios', function (Blueprint $table) {
+            $table->increments("id");
+            $table->string("login", 100)->unique;
+            $table->string("password", 255);
+            $table->string("nome", 50);
+            
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('usuarios');
+    }
+}
+
+
+
+---ENDEREÇO 
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateEnderecosTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('enderecos', function (Blueprint $table) {
+            $table->increments("id");
+            $table->string("logradouro");
+            $table->string("numero");
+            $table->string("cidade");
+            $table->string("estado");
+            $table->string("cep");
+            $table->string("complemento");
+           
+            $table->integer("usuario_id")->unsigned();
+            
+            $table->timestamps();
+
+            $table->foreign("usuario_id")
+            ->references("id")->on("usuarios")
+            ->onDelete("cascade");
+
+
+            
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('enderecos');
+    }
+}
+
+
+---PEDIDO
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreatePedidoosTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('pedidos', function (Blueprint $table) {
+            $table->increments("id");
+            $table->datetime("datapedido");
+            $table->string("status", 4);
+            $table->integer("usuario_id")->unsigned();
+
+
+            $table->timestamps();
+
+            $table->foreign("usuario_id")
+            ->references("id")->on("usuarios")
+            ->onDelete("cascade");
+
+
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('pedidos');
+    }
+}
+
+
+------ITENSPEDIDOS
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateItensPedidosTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('itens_pedidos', function (Blueprint $table) {
+            $table->increments("id");
+            $table->integer("quantidade");
+            $table->decimal("valor", 10, 2);
+            $table->datetime("dt_item");
+
+            $table->integer("produto_id")->unsigned();
+            $table->integer("pedido_id")->unsigned();
+
+            $table->timestamps();
+
+            $table->foreign("produto_id")
+            ->references("id")->on("produtos")
+            ->onDelete("cascade");
+
+            $table->foreign("pedido_id")
+            ->references("id")->on("pedidos")
+            ->onDelete("cascade");
+
+
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('itens_pedidos');
+    }
+}
+
+PULO ------------
+
+---PASSEI UM DUM-LOAD (opcional)
+# composer dum-autoload
+
+---- VAMOS NO AQUI .ENV e configura
+
+APP_NAME=Novo
+APP_ENV=local
+APP_KEY=base64:CKtS+zdXznSIZERFyfV6QkxS8IRIO6W9MVFzMG6C3SM=
+APP_DEBUG=true
+APP_URL=http://novo.teste
+LOG_CHANNEL=stack
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sacola
+DB_USERNAME=carlos
+DB_PASSWORD=casb
+
+FINAL DO PULO
+
+29-------RODAR  MIGRATIONS
+# php artisan migrate
+
+
+-------OK PERFEITO
+
+30--------------ROTAS--------------
+31---Antes vamos criar um Produtocontroller
+
+# php artisan make:controller Admin\ProdutoController
+
+
+PULO xxxxxx  PROCURE O FINAL DO PULO (item 45)---Não consegui fazer por esta rota , fala que o controller class não existe
+
+
+32----Agora vamos em ROTA apagar a rota existente e criar uma Rota com array
+--ESTAVA ASSIM
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+/*
+Route::get('/', function () {
+    return view('welcome');
+});
+*/
+
+
+
+Route::get('/', function () {
+    return view('home');
+});
+
+---VAI FICAR ASSIM
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProdutoController;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+/* se a rota / for via get ou post 
+ela chame a classe ProdutoController (declare la em cima), especificamente o 
+metodo index
+
+*/
+Route::match (['get', 'post'], '/', [ ProdutoController::class, 'index'])->name('home');
+
+
+33-------VOLTAMOS NO ProdutoController e criamos o metodo index
+--configura pra ateste
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class ProdutoController extends Controller
+{
+    public function index(Request $request){
+
+echo "pagina teste";
+
+    }
+}
+---OK PERFEITO
+
+34---Vamos no metodo index, crir uma variavel date como array e retorna a view home
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class ProdutoController extends Controller
+{
+    public function index(Request $request){
+
+        $data=[];
+        
+        return view ('home', $data);
+
+    }
+}
+---OK PERFEITO
+
+35---Vamos criar mais outras 2 ROTAS
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProdutoController;
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+/* se a rota / for via get ou post 
+ela chame a classe ProdutoController (declare la em cima), especificamente o 
+metodo index
+
+*/
+Route::match (['get', 'post'], '/', [ ProdutoController::class, 'index'])->name('home');
+Route::match (['get', 'post'], '/categoria', [ ProdutoController::class, 'categoria'])->name('categoria');
+Route::match (['get', 'post'], '/cadastrar', [ ClienteController::class, 'cadastrar'])->name('cadastrar');
+
+36---- VAMOS CRIAR o metodo categoria no ProdutoController e seguir o mesmo padrão
+chamando a view categoria
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class ProdutoController extends Controller
+{
+    public function index(Request $request){
+
+        $data=[];
+        
+        return view ('home', $data);
+
+    }
+
+
+public function categoria(Request $request){
+
+    $data=[];
+    return view ('categoria', $data);
+}
+
+
+}
+
+
+37------VAMOS CRIAR O Controlller ClienteController
+# php artisan make:controller ClienteController
+
+---E criar o metodo cadastrar
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class ClienteController extends Controller
+{
+    public function cadastrar(Request $request){
+
+        $data=[];
+        return view ('cadastrar', $data);
+    }
+    
+}
+
+38----VAMOS FAZER AS VIEW categoria e cadastrar
+--CADASTRAR
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="with-device-with, initial-scale-1.0">
+    <title>Título da página</title>
+  </head>
+  <body>
+    Aqui vai o código HTML que fará seu site aparecer.
+  </body>
+</html>
+
+---CATEGORIAS
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="with-device-with, initial-scale-1.0">
+    <title>Título da página</title>
+  </head>
+  <body>
+   <h2>Categiria</h2>
+  </body>
+</html>
+
+----EM WEB DE ROTA DECLARAR Controller ClienteController
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\ClienteController;
+
+----- OK PERFEITO. funcionando
+
+----VAMOS NA (pagina) VIEW home e chama um comando route 
+
+<a href="#" class="navbar-brand">Myshop</a>
+<div class="collapse navbar-collapse">
+    <div class="navbar-nav">
+    <a  class="nav-link" href="{{ route('home')}}" >Home</a>
+    <a  class="nav-link" href="{{ route ('categoria')}}" >Categorias</a>
+    <a  class="nav-link" href="{{ route ('cadastrar')}}" >Cadastrar</a>
+    
+</div>
+</div>
+
+----OK PERFEITO
+
+
+39---TRAbalhar BANCO DE DADOS
+
+--VAMOS CRIAR UMA MIGRATION insert_products
+
+# php artisan make:migration insert_products
+
+40-Antes vamos no MODEL categoria e produtos (sabendo que herdam o RModel)
+
+---MODEL produto
+
+<?php
+
+namespace App\Models;
+
+class Produto extends Model
+{
+    // a tabel a que vai apontar é para tabela produtos
+   protected $table= "produtos";
+   //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+   protected $fillable = ['nome', 'foto','descricao','valor','categoria_id'];
+
+}
+
+
+---MODEL categoria
+<?php
+
+namespace App\Models;
+
+class Categoria extends RModel
+{
+      // a tabel a que vai apontar é para tabela categoria
+        protected $table= "categorias";
+    //quais campos vai ser inseridos na tabela , ja que em Rmodel esta nulo por padrão
+    protected $fillable = ['categoria'];
+
+}
+
+41---FEITO ISSO VOLTAMOS PARA A MIGRAION insert_products
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class InsertProducts extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        //PARA CADASTRAR categorias ---armagenas na variavel cat uma nova categoria de nome Geral
+        //e mandar salvar
+        $cat= new \App\Models\categoria(['categoria' => 'Geral']);
+        $cat->save();
+
+
+
+        //PARA CADASTRAR produto -----armagenas na variavel prod uma nova produto de nome dos campos da tabela
+        //e mandar salvar
+        $prod= new \App\Models\produto(['nome' =>'produto 1', 'valor'=>10, 'foto' =>'images/produto1.jpg', 'descricao'=>'', 'categoria_id'=>$cat->id]);
+        $prod->save();
+
+        $prod2= new \App\Models\produto(['nome' =>'produto 2', 'valor'=>10, 'foto' =>'images/produto2.jpg', 'descricao'=>'', 'categoria_id'=>$cat->id]);
+        $prod2->save();
+
+        $prod3= new \App\Models\produto(['nome' =>'produto 3', 'valor'=>10, 'foto' =>'images/produto3.jpg', 'descricao'=>'', 'categoria_id'=>$cat->id]);
+        $prod3->save();
+        $prod4= new \App\Models\produto(['nome' =>'produto 4', 'valor'=>10, 'foto' =>'images/produto4.jpg', 'descricao'=>'', 'categoria_id'=>$cat->id]);
+        $prod4->save();
+        $prod5= new \App\Models\produto(['nome' =>'produto 5', 'valor'=>10, 'foto' =>'images/produto5.jpg', 'descricao'=>'', 'categoria_id'=>$cat->id]);
+        $prod5->save();
+        $prod6= new \App\Models\produto(['nome' =>'produto 6', 'valor'=>10, 'foto' =>'images/produto6.jpg', 'descricao'=>'', 'categoria_id'=>$cat->id]);
+        $prod6->save();
+        $prod7= new \App\Models\produto(['nome' =>'produto 7', 'valor'=>10, 'foto' =>'images/produto7.jpg', 'descricao'=>'', 'categoria_id'=>$cat->id]);
+        $prod7->save();
+        $prod8= new \App\Models\produto(['nome' =>'produto 8', 'valor'=>10, 'foto' =>'images/produto8.jpg', 'descricao'=>'', 'categoria_id'=>$cat->id]);
+        $prod8->save();
+        
+    }
+
+    /**
+     * Reverse the migrations.
+     
+     * @return void
+     */
+    public function down()
+    {
+        //
+    }
+}
+
+
+42------RODAR MIGRATION ---(fazer a iinserçaõ (insert_product) com os registros
+nas tabelas categoria e produtos
+
+# php artisan migrate 
+
+-----CRIOU OS REGISTROS nas tabelas categorias e produtos
+
+----AGORA VAMOS COMEÇAR A VER COMO BUSCA OS PRODUTOS DO BANCO DE DADOS
+---VANMOS NA VIEW home (E vamos deixar apenas um produto)
+
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content ="width-device-width, initial-scale=1.0">
+    <title>Novo</title>
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-v4-rtl/4.6.0-2/js/bootstrap.min.js">
+  </head>
+  <body>
+      <nav class ="navbar navbar-light navbar-expand-md bg-light pl-5 pr-5 mb-5">
+
+<a href="#" class="navbar-brand">Myshop</a>
+<div class="collapse navbar-collapse">
+    <div class="navbar-nav">
+    <a  class="nav-link" href="{{ route('home')}}" >Home</a>
+    <a  class="nav-link" href="{{ route ('categoria')}}" >Categorias</a>
+    <a  class="nav-link" href="{{ route ('cadastrar')}}" >Cadastrar</a>
+    
+</div>
+</div>
+<a href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+</nav>
+
+<div class="container">
+<div class="row"> 
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset('images/produto1.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 1</h6>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+
+</div>
+</div>
+</div>
+
+
+</div>
+</div>
+
+   
+
+
+
+     <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>
+
+43-----AGORA VAMOS NO CONTROLLER QUE MOSTRAR A home (Produto controller)
+E MOSTRAREMOS TODOS OS PRODUTOS
+
+?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class ProdutoController extends Controller
+{
+    public function index(Request $request){
+
+        $data=[];
+
+        // Buscar todos os produtos ---consulta todos os produtos e joga para dentro da array
+        // ai pega a array lista la na VIEW home
+        $listaProdutos = \App\Models\Produto::all();
+        $data['lista'] = $listaProdutos;
+
+
+        
+        return view ('home', $data);
+
+    }
+
+
+public function categoria(Request $request){
+
+    $data=[];
+    return view ('categoria', $data);
+}
+
+
+}
+
+44------VAMOS PEGAR NA VIEW home como um $forech
+
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content ="width-device-width, initial-scale=1.0">
+    <title>Novo</title>
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-v4-rtl/4.6.0-2/js/bootstrap.min.js">
+  </head>
+  <body>
+      <nav class ="navbar navbar-light navbar-expand-md bg-light pl-5 pr-5 mb-5">
+
+<a href="#" class="navbar-brand">Myshop</a>
+<div class="collapse navbar-collapse">
+    <div class="navbar-nav">
+    <a  class="nav-link" href="{{ route('home')}}" >Home</a>
+    <a  class="nav-link" href="{{ route ('categoria')}}" >Categorias</a>
+    <a  class="nav-link" href="{{ route ('cadastrar')}}" >Cadastrar</a>
+    
+</div>
+</div>
+<a href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+</nav>
+
+<div class="container">
+<div class="row"> 
+  @if(isset($lista))
+  @foreach ($lista as $prod)
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset($prod->foto ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+
+</div>
+</div>
+</div>
+@endforeach
+@endif
+
+</div>
+</div>
+     <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>
+
+
+
+
+45----FINAL DO PULO  XXXXXXXXXXXXXXXXXXXXXXXXX vourefazer desde o ITEN 32
+
+46- VAMOS FAZER o ProdutoController (Da nossa maneira)
+
+# php artisan make:controller Admin\ProdutoController
+
+47- VAMOS FAZER AS ROTAS DO PRODUTOS
+
+/*
+    ROTA PRODUTO 
+
+--NÃO CONSEGUI ACHAR O CONTROLLER PRODUTO PELA ROTER ABAIXO, Deixei a rota da forma antiga antiga
+Route::match (['get', 'post'], '/', [ProdutoController::class, 'index'])->name('produtos.index');
+Route::match (['get', 'post'], '/admin/produtos', [ProdutoController::class, 'index'])->name('produtos.index');
+*/
+
+Route::get('/admin/produtos', 'Admin\ProdutoController@index')->name('produtos.index');
+
+48 - VAMOS EM coonfig/adminlte fazer o MENU
+
+[
+            'text' => 'produtos',
+            'url'  => 'admin/produtos',
+            'icon' => 'fas fa-dice-d20',  
+        ],
+
+49 -  CODIFICAR O ProdutoController NO METODO INDEX       
+
+public function index()
+{
+return view('admin.pages.produtos.index');
+}
+
+50- CRIAR A VIEW index de Produto (igual a gerals) em admin.pages.produto.index
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('produtos.categoria') }}">Categoria</a></li>
+        <a href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+    </ol>
+    
+@stop
+
+@section('content')
+<div class="container">
+<div class="row"> 
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset('foto/produto1.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 1</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto2.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 2</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+
+<div class="col-3 mb-3">
+
+<div class="card">
+
+<img src="{{asset('foto/produto3.jpg' ) }}" class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 3</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto4.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 4</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto5.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 5</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto6.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 6</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+<img src="{{asset('foto/produto7.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 7</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset('foto/produto8.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 8</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+</div>
+    
+@stop
+
+51 - VAMOS CRIAR o metodo categoria no ProdutoController e seguir o mesmo padrão
+chamando a view categoria
+
+public function categoria()
+{
+return view('admin.pages.produtos.categoria');
+}
+
+52 - FAZ a Rota categoria
+
+ 
+ / /ROTA DO PRODUTO
+Route::get('/admin/produtos', 'Admin\ProdutoController@index')->name('produtos.index');
+Route::get('/admin/produtos/categorias', 'Admin\ProdutoController@categoria')->name('produtos.categoria');
+
+
+53 - ---VAMOS CRIAR O Controlller ClienteController
+# php artisan make:controller Admin\ClienteController
+
+54---E criar o metodo cadastrar --FORMA DIFERENTE
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class ClienteController extends Controller
+{
+    public function cadastrar(Request $request){
+
+        $data=[];
+        return view ('admin.pages.clientes.cadastrar', $data);
+    }
+}
+
+
+55 - FAZER A ROTA cliente.cadastrar = --FORMA DIFERENTE (tipo match)
+
+/*
+    ROTA CLIENTE 
+
+--NÃO CONSEGUI ACHAR O CONTROLLER CLIENTE PELA ROTER ABAIXO, Deixei a rota da forma antiga antiga
+use App\Http\Controllers\ClienteController;
+Route::match (['get', 'post'], '/cadastrar', [Admin\ClienteController::class, 'cadastrar'])->name('cadastrar');
+*/
+
+
+//use App\Http\Controllers\Controller\cadastrar;  (opcional)
+
+Route::match (['get', 'post'], '/admin/clientes/cadastrar', 'Admin\ClienteController@cadastrar')->name('cadastrar');
+
+56 - VAMOS TRABALHAR COM CATEGORIAS ------------------------EXCELENTE
+57 - ---VAMOS CRIAR O Controlller CategoriaController
+# php artisan make:controller Admin\CategoriaController
+
+58- FAZER O METODO INDEX do CategoriaController (Não esquecer dre colocar o use App\Models\Categoria; - tirei o RMODEL
+DA MODEL) E MOSTRAR VIEW index DA CATEGORIAS
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Categoria;
+class CategoriaController extends Controller
+{
+  
+public function index(){
+   // dd('Estou aqui em: CategoryController no método store()');
+  
+         $categorias =Categoria::all();
+        
+        return view('admin.pages.categorias.index', compact('categorias'));
+
+
+}
+
+
+}
+
+59-----A view  categorias.index fica asssimm
+
+@extends('adminlte::page')
+
+@section('title', 'categoriaos')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+    <a href="#" class="btn btn-dark">CADASTRAR PESSOAS</a>
+    <a href="#" class="btn btn-primary">Importar PESSOAS</a>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-header">
+                #filtross
+
+                </div>
+        <div class="card-body">
+
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    
+                     <th style="width: 200px">Ação</th>
+
+                </tr>
+
+            </thead>
+            <body>
+            @foreach($categorias as $categoria)
+                 <tr>
+                    <td>{{ $categoria->categoria }}</td>
+                    
+                    <td>
+                    <a href="{{ route('categorias.edit', $categoria->id) }}" class="fas fa-edit"></a>
+                    <a href="{{ route('categorias.show', $categoria->id) }}" class="fas fa-fw fa-user"></a>
+                    <a href="{{ route('categorias.show', $categoria->id) }}" class="fas fa-trash-alt"></a>
+                    </tr>
+                    @endforeach
+            </body>
+        </table> <i class=""></i>
+       
+    
+                </div>
+            </div>
+
+            <div class="card-footer">
+              
+            </div>
+
+@stop
+
+60-----A MODELS categoria
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Categoria extends Model
+{
+     // a tabel a que vai apontar é para tabela categoria
+     protected $table= "categorias";
+     //quais campos vai ser inseridos na tabela , ja que em Rmodel esta nulo por padrão
+     protected $fillable = ['categoria'];
+}
+
+
+61 --- E A ROTA TIPO RESOURCE FICA DENTRO DO PREFIXO
+
+Route::prefix('admin')
+        ->namespace('Admin')
+         //->middleware('auth')
+        ->group(function() {
+            
+//ROTA PESSOAL (tipo resource)
+Route::resource('pessoas', 'PessoaController');
+
+//ROTA CATEGORIAS (tipo resource)
+Route::resource('categorias', 'CategoriaController');
+
+});
+
+
+62------CRIAR VIEW  admin.pages.categorias.create
+@extends('adminlte::page')
+
+@section('title', 'Cadastrando Categoria')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categorias.index') }}" class="active">Categoria</a></li>
+    </ol>
+<h1>Cadastrando Categoria  </h1>
+
+@stop
+
+@section('content')
+   
+            <div class="card">
+            <div class="card-body">
+            <form action="{{route('categorias.store')}}" class="form" method="POST" >
+@csrf
+@include('admin.includes.alerts')
+
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label> Categoria</label>
+      <input class="form-control" type="text" name="categoria" placeholder="name" value=" {{$categoria->categoria ?? old('name')}} ">
+    </div>
+    
+    </div>
+
+    
+  <button type="submit" class="btn btn-primary">CADASTRAR CATEGORIA</button>
+
+</form>
+
+
+</div>
+</div>
+
+
+@endsection  
+
+63-------FAZER O METODO CREATE E STORE do CategoriaController (Não esquecer dre colocar o use App\Models\Categoria;)
+ja retirado o RModel
+
+----- LA EM CIMA OLHA SE DECLAROU  - use App\Models\Categoria;
+-----VOU COLOCAR Validação no categoria.store
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Categoria;
+class CategoriaController extends Controller
+{
+  
+public function index(){
+   // dd('Estou aqui em: CategoryController no método store()');
+  
+ // $categorias=[]
+  //  $categorias = Categoria::all();
+ // return view('admin.pages.categorias.index', compact('categorias') );
+// return view('admin.pages.categorias.index');
+;
+
+        $categorias =Categoria::all();
+        
+        return view('admin.pages.categorias.index', compact('categorias'));
+
+
+
+}
+public function create()
+    {
+        return view('admin.pages.categorias.create');
+    }
+
+
+    public function store(Request $request)
+    {
+        //  dd($request->all());----TESTANDO
+
+        $rules = [
+    
+                // 'categoria' é obrigatório & deve ter o mínimo de 3 letras
+                'categoria' => 'required|min:3'
+                 ];
+
+                 $messages = [
+                        'categoria.required' => 'Opa! Parece que você se esqueceu de digitar seu nome.',
+                           
+                         'categoria.min' => 'Calma aí, seu nome só tem duas letras? Tente novamente com seu nome real e seu sobrenome',
+                         
+                    ];
+                 // Validação da Request  
+                 
+                  $request->validate($rules,  $messages );
+                  
+                  // dd($categorias);
+                // dd($request->all());
+                 $categoria = new Categoria;
+                $categoria = $categoria->create($request->all());
+                return redirect()->route('categorias.index');
+
+
+                
+    }
+
+
+}
+
+------OK PERFEITO inseriu
+
+64 -------EXPORTAR E IMPORTAR EXCEL categorias
+
+65------EXECUTAR maatwebsite/excel 
+
+# composer require maatwebsite/excel
+
+66--- colocar classe em provider e aliases em admin/app.php 
+
+providers' => [
+  .......
+  .......
+  .......
+  Maatwebsite\Excel\ExcelServiceProvider::class,
+ 
+ ],  
+
+'aliases' => [ 
+  .......
+  .......
+  .......
+  'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+
+], 
+
+----RODAR COMANDO PARA CONFIGURAR
+
+# php artisan vendor:publish --provider="Maatwebsite\Excel\ExcelServiceProvider" --tag=config
+
+67 -----para EXPORTAÇÂO -- Vamos em CategoryController e codificamos
+
+---FAZER ROTA DE EXPORTAÇÃO 
+
+/*
+ //ROTA EXPORTAR E IMPORTAR CATEGORIA 
+ 
+*/
+Route::get('categorias/export/', 'Admin\CategoriaController@exportExcel')->name('excel-export');;
+
+----E DEPOS O METODO EXPORTAR em CategoryController
+public function expotExcel()
+            {
+                return Excel::download(new categoriasExport, 'listacategorias.xlsx');
+
+68 ---- DECLARAR LA EM CIMA  A CLASSE Maatwebsite em CategoryController
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Categoria;
+
+use Maatwebsite\Excel\Facades\Excel;
+
+class CategoriaController extends Controller
+...
+
+69-----EXECUTAR comando
+
+# php artisan make:export CategoriasExport --model=Categoria ---FOI ESSA
+OU
+# php artisan make:export CategoriasExport
+
+70 --------CRIAR A CLASSE NO DIRETPORIO EXPORTAR em categoriasExport
+<?php
+
+namespace App\Exports;
+
+use App\Models\Categoria;
+use Maatwebsite\Excel\Concerns\FromCollection;
+
+class CategoriasExport implements FromCollection
+{
+    /**
+    * @return \Illuminate\Support\Collection
+    */
+    public function collection()
+    {
+         return Categoria::all();   //PADRÃO
+
+         //PODER FAZER UM SELECT como abaaixo
+      //  return Categoria::select("id", "categoria")->get();    
+
+    }
+}
+
+----QUE PODEMOS MODIFICAR PARA A EXPORTAÇÂP DOS CAMPOS QUE DESEJAR
+
+
+71 ---DECLARA A CLASSE (use App\Exports\categoriasExport;) em cima de CategoriaController
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Categoria;
+
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\categoriasExport;
+
+
+class CategoriaController extends Controller
+{
+
+...
+
+72 -----------CRIAR METODO exportExcel em CategoriaController
+
+public function exportExcel()
+            {
+                return Excel::download(new categoriasExport, 'listacategorias.xlsx');
+                
+            }
+
+
+73 -----NA VIEW admin.pages.categorias.index COLOCAE BOTÃO Export CATEGORIAS co link para ROTA {{route('excel-export')}}
+@extends('adminlte::page')
+
+@section('title', 'categoriaos')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+    </ol>
+    <a href="{{route('categorias.create')}}" class="btn btn-dark">CADASTRAR CATEGORIAS</a>
+    <a href="{{route('categorias.import')}}" class="btn btn-primary">Importar CATEGORIAS</a>
+    <a href="{{route('excel-export')}}" class="btn btn-dark">Exportar CATEGORIAS</a>
+
+@stop
+
+@section('content')
+
+...
+-----------------------
+
+
+74------AGORA VAMOS FAZER A IMPORTAÇÃO
+ JA FEITA A configuração do Maatwebsite\Excel\Facades\Excel;
+
+ ---- VAMOS CRIAR UMA PAGINA (view) admin.pages.categorias.importexcel DE ESCOLHA (busca ) DO ARQUIVO
+@extends('adminlte::page')
+
+@section('title', 'Importar Categoria')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categorias.index') }}" class="active">Categoria</a></li>
+    </ol>
+<h1>Importar Categoria  </h1>
+
+@stop
+
+@section('content')
+   
+<div class="container mt-5 text-center">
+   
+        <form action="{{route('categorias.importexcel')}}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @include('admin.includes.alerts')
+                    <div class="form-group">
+                    <div class="custom-file text-left">
+                        
+                        <input type="file"  name="file" acccept=".xlsx">
+                        
+                    </div>
+                    </div>
+            <button class="btn btn-primary">Import data</button>
+            <a class="btn btn-success" href="#">Export data</a>
+        </form>
+
+    </div>
+
+
+@endsection  
+
+75-------FAZER A ROTA PARA APONTAR PARA ESSA VIEW ATRAVES DA VIEW INDEX
+
+
+//IMPORTAR CATEGORIA 
+// Rota que leva para pagina de escolha de arquivo
+Route::get('categorias/import/', 'Admin\CategoriaController@import')->name('categorias.import');;
+
+
+//ROTA que faz a importação
+Route::post('categorias/importexcel/', 'Admin\CategoriaController@importExcel')->name('categorias.importexcel');
+
+
+76------NO CategoriaController fazer metodo import PARA DIRECIONAR PARA VIEW admin.pages.categorias.importexcel
+public function import()
+            {
+                return view('admin.pages.categorias.importexcel');
+                
+            }
+
+
+
+77------RODAR COMANDO ---PARA CRIAR Classe
+
+# php artisan make:import CategoriasImport --model=Categorias    ---Usei esse
+ou
+# php artisan make:import CategoriasImport
+
+78---- VAI CRIAR YM DIRETORIO IMPORTS com uma PAGINA CategoriasImport.php 
+(Serão os campos que vamos importar conforme fillable da model)
+
+<?php
+
+namespace App\Imports;
+
+use App\Models\Categoria;
+use Maatwebsite\Excel\Concerns\ToModel;
+
+class CategoriasImport implements ToModel
+{
+   
+    public function model(array $row)
+    {
+        return new Categoria([
+            'categoria' => $row[0],
+        ]);
+    }
+}
+
+
+79 ---FAZER ROTA de importar Excel
+
+//IMPORTAR CATEGORIA 
+// Rota que leva para pagina de escolha de arquivo
+Route::get('categorias/import/', 'Admin\CategoriaController@import')->name('categorias.import');;
+
+
+//ROTA que faz a importação
+Route::post('categorias/importexcel/', 'Admin\CategoriaController@importExcel')->name('categorias.importexcel');
+
+80 ----- VAMOS EM CategoriaController e FAZ O METODO DE IMPORTAÇÃO DECLARAMDO
+EM CIMA O use App\Imports\CategoriasImport;
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Categoria;
+
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\categoriasExport;
+use App\Imports\CategoriasImport;
+
+...
+          public function import()
+            {
+                return view('admin.pages.categorias.importexcel');
+                
+            }
+
+            public function importExcel(Request $request)
+            {
+                
+                      Excel::import(new CategoriasImport, request()->file('file'));
+                      return redirect()->route('categorias.index')->with('success', 'All good!');
+                    
+            }
+
+81-----------VAMOS NA VIEW importExcel.blade E COLOCAMOS O LINK DA ROTA
+
+@extends('adminlte::page')
+
+@section('title', 'Importar Categoria')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categorias.index') }}" class="active">Categoria</a></li>
+    </ol>
+<h1>Importar Categoria  </h1>
+
+@stop
+
+@section('content')
+   
+<div class="container mt-5 text-center">
+   
+        <form action="{{route('categorias.importexcel')}}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @include('admin.includes.alerts')
+                    <div class="form-group">
+                    <div class="custom-file text-left">
+                        
+                        <input type="file"  name="file" acccept=".xlsx">
+                        
+                    </div>
+                    </div>
+            <button class="btn btn-primary">Import data</button>
+            <a class="btn btn-success" href="#">Export data</a>
+        </form>
+
+    </div>
+
+
+@endsection  
+
+
+
+---MISTURAndo
+
+82------PEGAR A VIEW gerals.index e substitui A ROTA categoria
+(vai para um view que vamos criar catetorias.categoria)
+
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+    </ol>
+  
+@stop
+
+83-----CRIAR A ROTA QUE VAI PARA catetorias.categoria
+<?php
+
+use App\Http\Controllers\Admin\CategoriaController;
+
+//EWRIRADA DE PERFIXOS DAS ROTAS
+
+Route::prefix('admin')
+        ->namespace('Admin')
+         //->middleware('auth')
+        ->group(function() {
+            
+//ROTA PESSOAL (tipo resource)
+Route::resource('pessoas', 'PessoaController');
+
+//ROTA CATEGORIAS (tipo resource)
+Route::resource('categorias', 'CategoriaController');
+
+//ROTA CATEGORIAS (vai para view categorias.categoria)
+//ESSA TEM QUE DECLARAR EM route.Web ´a class (use App\Http\Controllers\Admin\CategoriaController;) -----´FOI A QUE USEi
+Route::match (['get', 'post'], '/categoria', [CategoriaController::class, 'categoria'])->name('categoria');
+
+
+
+//A DEBAIXA DAR CERTO SEM DECLARAR 
+//Route::match (['get', 'post'], '/categoria',  'CategoriaController@categoria')->name('categoria');
+
+});
+
+84------VAMOS EM CategoriaController e faz o METODO categoria
+  public function categoria(Request $request){
+
+                $data=[];
+                  return view ('admin.pages.categorias.categoria', $data);
+              // return view('admin.pages.categorias.categoria');
+
+            }
+
+
+85----------VAMOS FAZER UMA IMPORTAÇÂO DE PRODUTODO
+(mudei o nome de uma uma view ociosa para aroveitar era produtos.categoria e ficou produtos.importproduto)
+
+----NA VIEW produtos.index VAMOS COLOCAR UM BOTÃO COM LINK PARA VIEW produtos.importproduto
+(repetir passos de importar categoria)
+
+
+86---FAZER A ROTA DE IMPORTAÇÃO DO PRODUTO DO  BOTÃO (a que vai para pagina de selecionar arquivo e a que importa realmente)
+
+//ROTA DE  EXPORTAR E IMPORTAR DE PRODUTO
+
+//rota do botão que vai para produtos.importproduto (pagina de escolha do arquivo)
+Route::get('Produtos/importproduto/', 'Admin\ProdutoController@importproduto')->name('produtos.importproduto');
+
+
+-----FAZER A VIEW produtos.importproduto
+@extends('adminlte::page')
+
+@section('title', 'Importar Produto')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categorias.index') }}" class="active">Categoria</a></li>
+    </ol>
+<h1>Importar Produto  </h1>
+
+@stop
+
+@section('content')
+   
+<div class="container mt-5 text-center">
+   
+        <form action="{{route('categorias.importexcel')}}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @include('admin.includes.alerts')
+                    <div class="form-group">
+                    <div class="custom-file text-left">
+                        
+                        <input type="file"  name="file" acccept=".xlsx">
+                        
+                    </div>
+                    </div>
+            <button class="btn btn-primary">Import data</button>
+            <a class="btn btn-success" href="#">Export data</a>
+        </form>
+
+    </div>
+
+
+@endsection
+
+87------RODAR COMANDO ---PARA CRIAR Classe
+
+# php artisan make:import ProdutosImport --model=Produtos    ---Usei esse
+ou
+# php artisan make:import ProdutosImport
+
+88---- VAI CRIAR YM DIRETORIO IMPORTS com uma PAGINA ProdutosImport.php 
+(Serão os campos que vamos importar conforme fillable da model) ----JÁ PREENCHER
+OBSERVAÇÂO DEU UM ERRO (pq o proprio laravel trouxe a classe Produto no plural, RETIRE O 'S')
+
+<?php
+
+namespace App\Imports;
+
+use App\Models\Produto;
+use Maatwebsite\Excel\Concerns\ToModel;
+
+class ProdutosImport implements ToModel
+{
+    /**
+    * @param array $row
+    *
+    * @return \Illuminate\Database\Eloquent\Model|null
+    */
+    public function model(array $row)
+    {
+        return new Produto([
+            'nome' => $row[0],
+            'valor' => $row[1],
+            'foto' => $row[2],
+            'descricao' => $row[3],
+            'categoria_id' => $row[4],
+
+        ]);
+    }
+}
+
+
+
+
+
+89-----FAZER ROTA de importar PRODUTOS
+
+//ROTA DE  EXPORTAR E IMPORTAR DE PRODUTO
+
+//rota do botão que vai para produtos.importproduto (pagina de escolha do arquivo)
+Route::get('Produtos/importproduto/', 'Admin\ProdutoController@importproduto')->name('produtos.importproduto');
+
+//ROTA que faz a importação
+Route::post('Produtos/importprodutoReal/', 'Admin\ProdutoController@importprodutoReal')->name('produtos.importprodutoReal');
+
+90 ----- VAMOS EM ProdutoController e FAZ O METODO DE IMPORTAÇÃO DECLARAMDO
+EM CIMA O use App\Imports\ProdutosImport;
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Categoria;
+
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\categoriasExport;
+use App\Imports\CategoriasImport;
+
+...
+          public function import()
+            {
+                return view('admin.pages.categorias.importexcel');
+                
+            }
+
+            public function importExcel(Request $request)
+            {
+                
+                      Excel::import(new CategoriasImport, request()->file('file'));
+                      return redirect()->route('categorias.index')->with('success', 'All good!');
+                    
+            }
+
+91-----------VAMOS NA VIEW importExcel.blade E COLOCAMOS O LINK DA ROTA
+
+@extends('adminlte::page')
+
+@section('title', 'Importar Categoria')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categorias.index') }}" class="active">Categoria</a></li>
+    </ol>
+<h1>Importar Categoria  </h1>
+
+@stop
+
+@section('content')
+   
+<div class="container mt-5 text-center">
+   
+        <form action="{{route('produtos.importprodutoReal')}}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @include('admin.includes.alerts')
+                    <div class="form-group">
+                    <div class="custom-file text-left">
+                        
+                        <input type="file"  name="file" acccept=".xlsx">
+                        
+                    </div>
+                    </div>
+            <button class="btn btn-primary">Import data</button>
+            <a class="btn btn-success" href="#">Export data</a>
+        </form>
+
+    </div>
+
+
+@endsection  
+
+92 -----FAZER ARQUIVO EXCEL (xlsx)  listatproduto.xlsx E SELECIONAR
+
+
+-------------------------OK PERFEITO , IMPORTOU
+
+93-------AGORA VAMOS COMEÇAR A VER COMO BUSCA OS PRODUTOS DO BANCO DE DADOS
+---VANMOS NA VIEW gerals.index (E vamos deixar apenas um produto)
+
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+    </ol>
+  
+@stop
+
+@section('content')
+<div class="container">
+<div class="row"> 
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset('foto/produto1.jpg' ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> Produto 1</h6>
+</div>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+</div>
+
+
+
+</div>
+    
+@stop
+
+
+
+
+94-----AGORA VAMOS NO CONTROLLER QUE MOSTRAR A gerals.index (GeralController controller)
+E MOSTRAREMOS TODOS OS PRODUTOS
+
+ public function index(Request $request)
+            {
+
+            //return view('admin.pages.gerals.index');
+
+            
+            $data=[];
+
+            // Buscar todos os produtos ---consulta (Request $request) todos os produtos e joga para dentro da array
+            // ai pega a array lista la na VIEW gerals.index'
+            $listaProdutos = \App\Models\Produto::all();
+            $data['lista'] = $listaProdutos;
+            return view ('admin.pages.gerals.index', $data);
+
+        }
+
+95------VAMOS PEGAR NA VIEW gerals.index como um $forech mostrar todos os produtos
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+    </ol>
+  
+@stop
+
+@section('content')
+<div class="container">
+<div class="row"> 
+
+<div class="col-3 mb-3">
+<div class="card">
+@if(isset($lista))
+  @foreach ($lista as $prod)  
+  <img src="{{asset($prod->foto ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+
+</div>
+
+
+</div>
+
+@endforeach
+@endif
+
+</div>
+    
+@stop
+
+---OBSERVAÇÂO: A LISTAGEM FICOU SEM FORMATO ----ERRO (consertando abaixo)
+
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+    </ol>
+  
+@stop
+
+@section('content')
+<div class="container">
+<div class="row">
+@if(isset($lista))
+  @foreach ($lista as $prod)
+   
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset($prod->foto ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+
+</div>
+</div>
+@endforeach
+@endif
+</div>
+</div>
+@endsection
+
+
+
+96------AULA 6----SEGUINDO VAMOS NO CategoriaController E MODIFICAMOS O METODO categoria
+
+---PRIMEIRO DECLARAR AS CLASSE Produtos e Categorias EM CIMA
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Categoria;
+use App\Models\Produto;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\categoriasExport;
+use App\Imports\CategoriasImport;
+
+class CategoriaController extends Controller
+
+---SEGUNDO MODIFICAR O METODO categoria
+
+   public function categoria(Request $request){
+
+              /*
+                $data=[];
+                // Buscar Categoria (SELECT)
+                 $listaCategorias = Categoria::all();
+                 $data["listaCategorias"]= $listaCategorias;
+               // dd($data);
+                   return view ('admin.pages.categorias.categoria', $data);
+              // return view('admin.pages.categorias.categoria');
+              */
+
+              $data=[];
+              // Buscar Categoria (SELECT)
+                  $listaCategorias = Categoria::all();
+              // Buscar Produtos limite 4    
+                  $listaProdutos = Produto::limit(4)->get();
+              
+                  $data["lista"]= $listaProdutos;
+                  $data["listaCategorias"]= $listaCategorias;
+              
+              
+                  return view ('admin.pages.categorias.categoria', $data);
+              
+              }
+
+
+
+97-----VAMOS EM VIEW categorias.categoria (sem se preocupar com Layat)
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+    </ol>
+  
+@stop
+
+@section('content')
+<h2>Categoria</h2>
+
+ 
+
+  @if(isset($listaCategorias)&& count($listaCategorias)>0 )
+  <ul>
+      @foreach($listaCategorias as $categoria)
+          <li>{{$categoria->categoria}}</li>
+
+      @endforeach
+  </ul>
+  
+@endif
+
+  @if(isset($lista)&& count($lista)>0 )
+  <ul>
+        @foreach($lista as $prod)
+          <li>{{$prod->nome}}</li>
+
+      @endforeach
+</ul>
+  @endif
+
+
+@stop
+
+
+98------------AGORA VAMOS MPOSTRAR PRODUTOS POR UMA query consulta
+---FAZREMOS UMA NOVA ROTA MAS FICA COM o METODO CATEGORIA NO CategoriaController
+(que faremos uma modificação, colocando a query)
+
+99-----ROTA 
+
+//ROTA CATEGORIA QUERU POR ID NO MESMO METODO categoria mas muda o nome da ROTA categoria_por_id
+Route::match (['get', 'post'], '/{idcategoria}/categoria', [CategoriaController::class, 'categoria'])->name('categoria_por_id');
+
+
+100-----METODO CATEGORIA EM CategoriaController
+
+ public function categoria($idcategoria = 0, Request $request){
+
+              /* PRIMEIRA 
+                $data=[];
+                // Buscar Categoria (SELECT)
+                 $listaCategorias = Categoria::all();
+                 $data["listaCategorias"]= $listaCategorias;
+               // dd($data);
+                   return view ('admin.pages.categorias.categoria', $data);
+              // return view('admin.pages.categorias.categoria');
+              */
+              /* SEGUNDA 
+              $data=[];
+              // Buscar Categoria (SELECT)
+                  $listaCategorias = Categoria::all();
+              // Buscar Produtos limite 4    
+                  $listaProdutos = Produto::limit(4)->get();
+              
+                  $data["lista"]= $listaProdutos;
+                  $data["listaCategorias"]= $listaCategorias;
+              
+              
+                  return view ('admin.pages.categorias.categoria', $data);
+              */
+
+               //TERCEIRA EVOLUÇÃO
+               $data=[];
+               // Buscar Categoria (SELECT)
+                   $listaCategorias = Categoria::all();
+               // Buscar Produtos limite 4    
+                 //  $listaProdutos = Produto::limit(4)->get();
+               
+                 // SELECT produtos
+                 $queryProduto = Produto::limit(4);
+               /* se idcategoria é diferente de 0 é porque foi passado algo)
+               se foi passado, a consulta é todos que em a categora id é igual ao idcategoria
+               que foi passado
+               WHERE categoria_id=idctegoria
+               */
+                 if($idcategoria !=0) {
+                   $queryProduto->where("categoria_id", $idcategoria);
+                     }
+                   $listaProdutos=$queryProduto->get();  
+               
+                   $data["lista"]= $listaProdutos;
+                   $data["listaCategorias"]= $listaCategorias;
+               
+               
+                   return view ('admin.pages.categorias.categoria', $data);
+}
+
+
+ 
+
+101-----AULA 7------VAMOS TRABALHAR O Layat
+------EM VIEW vamos criar uma pagina LAYOUT.blade.php 
+(vou copiar a gerals index.blade.php e levar para layout tirando a
+ exibição dos produtos e deixar somente o que é comum as demais telas
+ e colocar um @yield"conteudo")
+
+ @extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="#" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+    </ol>
+  
+@stop
+
+@section('content')
+<div class="container">
+<div class="row">
+<!-- NESSA DIVI TERMOS UMA AREA COMUM A TODAS TELAS---->
+@yield("conteudo")
+</div>
+</div>
+
+
+@endsection
+
+102----VAMOS EM NOSSO gerals index.blade.php e deixa somente a parte da inserção dos produtos (perdendo a formatação)
+
+@if(isset($lista))
+  @foreach ($lista as $prod)
+   
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset($prod->foto ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+
+</div>
+</div>
+@endforeach
+@endif
+
+------ai vamos la em cima da NOSSO gerals index.blade.php  e colocamos entends e abre sesction
+@extends("layout")
+@section("conteudo")
+
+...
+
+@endsection
+
+---FICANDO ASSIM
+
+@extends("layout")
+@section("conteudo")
+@if(isset($lista))
+  @foreach ($lista as $prod)
+   
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset($prod->foto ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+
+</div>
+</div>
+@endforeach
+@endif
+
+@endsection
+
+----voltando a exibir normalmente
+
+
+103----------VAMOS FAZER ISSO COM AS VIEW CATEGORIA E CADASTRAR 
+
+---CADASTRAR (ainda sem nada)
+@extends("layout")
+@section("conteudo")
+  <h2>CADASTRAR</h2>
+ @endsection
+
+ ----CATEGORIA (alguma coisa)
+@extends("layout")
+@section("conteudo")
+  <h2>Categoria</h2>
+
+ 
+
+  @if(isset($listaCategorias)&& count($listaCategorias)>0 )
+  <ul>
+      @foreach($listaCategorias as $categoria)
+          <li>{{$categoria->categoria}}</li>
+
+      @endforeach
+  </ul>
+  
+@endif
+
+  @if(isset($lista)&& count($lista)>0 )
+  <ul>
+        @foreach($lista as $prod)
+          <li>{{$prod->nome}}</li>
+
+      @endforeach
+</ul>
+  @endif
+
+
+  @endsection
+
+
+104-----VAMOS CRIAR MAIS UM VIEW PARA EXIBIÇÃO DOS PRODUTOS(produtos._produtos.blade.php)
+AQUI VAMOS PARTICIONAR AS VIEW
+
+--Pegar a parte da view gerals.index (exibição dos produtos) e colocar na 
+view _produtos.blade.php (a parte que fica dentro do @section('content')...@endsection)
+
+@if(isset($lista))
+  @foreach ($lista as $prod)
+   
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset($prod->foto ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
+</div>
+
+</div>
+</div>
+@endforeach
+@endif
+
+---ESTAMOS CRIANDO UM ARQUIVO EXTERNO (exibição PARA REPLICAR NAS DEMAIS TELAS)
+
+--E EM view gerals.index que tinha ficado sem o miolo (parte da exibição) VAMOS PEGAR por um 
+@include e mandando uma variavel $lista que é a nosaa $lista
+
+@extends("layout")
+@section("conteudo")
+@include("admin.pages.produtos._produtos", ['lista'=>$lista ])
+
+@endsection
+
+---ASSIM NADA MUDA NA gerals.index (visualmente)
+
+105---NA VIEW CATEGORIA (podemos fazer a mesma coisa ) - invocar o @include
+@extends("layout")
+@section("conteudo")
+  <h2>Categoria</h2>
+
+ 
+
+  @if(isset($listaCategorias)&& count($listaCategorias)>0 )
+  <ul>
+      @foreach($listaCategorias as $categoria)
+          <li>{{$categoria->categoria}}</li>
+
+      @endforeach
+  </ul>
+  
+@endif
+
+@include("admin.pages.produtos._produtos", ['lista'=>$lista ])
+
+
+  @endsection
+
+
+ ----------NA CATEGORIA AINDA VAMOS COLOCAR UM LNK
+  da ROTA PARA CATEGORIAS ID pra selecionar /PRODUTOS
+troquei o nome do objeto de $categoria para $cat (fazer isso em view categoria)
+
+@extends("layout")
+@section("conteudo")
+  
+
+<!--troquei o nome do objeto de $categoria para $cat (fazer isso em view categoria) e tirei a frase
+<h>Categoria</h> -->
+
+ 
+
+  @if(isset($listaCategorias)&& count($listaCategorias)>0 )
+  <ul>
+      @foreach($listaCategorias as $cat)
+          <li><a href="{{route('categoria_por_id', ['idcategoria' => $cat->id]) }}"> {{$cat->categoria}}</a></</li>
+
+      @endforeach
+  </ul>
+  
+@endif
+
+  @include("admin.pages.produtos._produtos", ['lista'=>$lista ])
+
+
+  @endsection
+
+  ------ISSO CRIA O LINK NA view categoria ja selecionando os produtos por categoria
+
+  -------------------Ainda MELHORANDO
+  (colocamos um link para todas as categorias em cima)
+  OBSERVAÇÃO: acho que esta rota não chamou todos
+
+@extends("layout")
+@section("conteudo")
+  
+
+ 
+
+  @if(isset($listaCategorias)&& count($listaCategorias)>0 )
+  <ul>
+          <li><a href="{{route('categoria') }}">Todas</a></</li>
+      @foreach($listaCategorias as $cat)
+          <li><a href="{{route('categoria_por_id', ['idcategoria' => $cat->id]) }}"> {{$cat->categoria}}</a></</li>
+
+      @endforeach
+  </ul>
+  
+@endif
+
+@include("admin.pages.produtos._produtos", ['lista'=>$lista ])
+
+
+  @endsection
+
+  ----LEMBRANDO QUE ESTAMOS LIMITANDO A 4 REGISTROS
+
+
+106-----MELHORANDO LAYOUT (não fiz)
+
+AULA 9 -- --PARTE DO CARRINHO
+
+----------FAzer uma nova rota
+
+//ROTA DO CARRINHO
+
+Route::match (['get', 'post'], '/{idproduto}/carrinho/adicionar', [ ProdutoController::class, 'adicionarcarrinho'])->name('adicionar_carrinho');
+
+---VAMOS EM VIEW _produtos (colocar link da rota e mudar nome de add=adicionar
+e passar como parametro o atributo idproduto que vai ser o id de $prod)
+
+@if(isset($lista))
+  @foreach ($lista as $prod)
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset($prod->foto ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
+<a href="{{route('adicionar_carrinho', ['idproduto' => $prod->id ]) }}" class="btn btn-sm btn-primary">Adicionar item</a>
+
+</div>
+</div>
+</div>
+@endforeach
+@endif
+
+
+---AGORA VAMOS EM ProdutoController CRIAR METODO adicionarcarrinho
+
+public function adicionarcarrinho ($idProduto = 0, Request $request) {
+
+  
+  //buscar o produto pelo ID
+  $prod=Produto::find($idProduto);
+  
+  if($prod) {
+//se o produto existir
+
+
+//buscar da sessão o carrinho atual
+$carrinho = session('cart', []);
+
+array_push ($carrinho, $prod);
+session(['cart' => $carrinho]);
+
+  }
+  return redirect()->route('home');
+}
+
+---------
