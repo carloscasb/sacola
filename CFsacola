@@ -4000,56 +4000,260 @@ troquei o nome do objeto de $categoria para $cat (fazer isso em view categoria)
   ----LEMBRANDO QUE ESTAMOS LIMITANDO A 4 REGISTROS
 
 
-106-----MELHORANDO LAYOUT (não fiz)
+106-----MELHORANDO LAYOUT 
+fazendo uma divisão global dos produtos na view categorias.categoria
+@extends("layout")
+@section("conteudo")
+  
 
-AULA 9 -- --PARTE DO CARRINHO
+<!--troquei o nome do objeto de $categoria para $cat (fazer isso em view categoria) e tirei a frase
+<h>Categoria</h> -->
 
-----------FAzer uma nova rota
 
-//ROTA DO CARRINHO
+<!--FAZER UM DIVISÂO DE COLUNA -->
+<div class="col-2"> 
 
-Route::match (['get', 'post'], '/{idproduto}/carrinho/adicionar', [ ProdutoController::class, 'adicionarcarrinho'])->name('adicionar_carrinho');
+  @if(isset($listaCategorias)&& count($listaCategorias)>0 )
+  <ul>
+          <li><a href="{{route('categoria') }}">Todas</a></</li>
+      @foreach($listaCategorias as $cat)
+          <li><a href="{{route('categoria_por_id', ['idcategoria' => $cat->id]) }}"> {{$cat->categoria}}</a></</li>
 
----VAMOS EM VIEW _produtos (colocar link da rota e mudar nome de add=adicionar
-e passar como parametro o atributo idproduto que vai ser o id de $prod)
+      @endforeach
+  </ul>
+  
+@endif
+</div>
+<!--USAR 2 COLUNA DAS 10 DISPONIVEL -->
+<div class="col-10"> 
+      @include("admin.pages.produtos._produtos", ['lista'=>$lista ])
+</div>
 
+  @endsection
+
+------E NA View proditos._produtos COLOCAR UM DIV row PARA FAZER AGREGANDO OS ITEM DENTRO DE UMA UMA LINHA 
 @if(isset($lista))
+<!-- COLUNA (row) AGREGAR ITEM DENTRO DE UMA LINHA -->
+<div class="row">
   @foreach ($lista as $prod)
+   
 <div class="col-3 mb-3">
 <div class="card">
 
 <img src="{{asset($prod->foto ) }}"    class="card-img-top" />
 <div class="card-body">
 <h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
-<a href="{{route('adicionar_carrinho', ['idproduto' => $prod->id ]) }}" class="btn btn-sm btn-primary">Adicionar item</a>
-
+<a rhef="#" class="btn btn-sm btn-primary">Add item</a>
 </div>
+
 </div>
 </div>
 @endforeach
+</div>
+@endif
+
+----DIVIDIU EM @ COLUNA E !) COLUNA E DENTRO UMA LINHA COM O ITEM (melhorou )
+
+---PARA MELHORAR OS ITEM VAMOS NA View categorias.categoria VAMOS COLOCAR OUTRA divisão <div class="list-group"> ...</div>
+ANTES DO <ul> e podemos ate tirar os <ul> e os <li> deixando somente os link e ainda dentro dos itens colocar uma 
+uma clss depois dos limk <div class="list-group-item list-group-action "> ...</div>
+--FICA ASSIM a view categorias.categoria
+
+@extends("layout")
+@section("conteudo")
+  
+
+<!--troquei o nome do objeto de $categoria para $cat (fazer isso em view categoria) e tirei a frase
+<h>Categoria</h> -->
+
+
+<!--FAZER UM DIVISÂO DE COLUNA -->
+<div class="col-2"> 
+
+  @if(isset($listaCategorias)&& count($listaCategorias)>0 )
+  <div class="list-group"> 
+  
+          <a href="{{route('categoria') }}" class="list-group-item list-group-action " >Todas</a>
+      @foreach($listaCategorias as $cat)
+          <a href="{{route('categoria_por_id', ['idcategoria' => $cat->id]) }}" class="list-group-item list-group-action " > {{$cat->categoria}}</a>
+
+      @endforeach
+  </ul>
+  </div>
+@endif
+</div>
+<!--USAR 2 COLUNA DAS 10 DISPONIVEL -->
+<div class="col-10"> 
+      @include("admin.pages.produtos._produtos", ['lista'=>$lista ])
+</div>
+
+  @endsection
+
+-----PODEMOS AINDA MELHORAR DEIXANDO MARCADO OS ITENS SELECIONADO
+
+--Vamos em  CategoryController e mandamos o ID do item CATEGORIA PARA VIEW categorias.categoria
+if($idcategoria !=0) {
+                   $queryProduto->where("categoria_id", $idcategoria);
+                     }
+                   $listaProdutos=$queryProduto->get();  
+               
+                   $data["lista"]= $listaProdutos;
+                   $data["listaCategorias"]= $listaCategorias;
+
+                   // <!--Mandando ID CATEGORIA PARA VIEW  -->
+                   $data["idcategoria"]= $idcategoria;
+               
+                   return view ('admin.pages.categorias.categoria', $data);
+
+
+
+              }
+----E LA NA View categorias.categoria PODEMO VERIFICAR UMA AçÂO DENTRO DA CLASS class="list-group-item list-group-action 
+SE O ID ATUAL for IGUAL AO ID ENVIADO COLOCA MAIS UMA CLASS
+ class="list-group-item list-group-item-action @if($cat->id === $idCategoria) active @endif"> 
+
+
+@extends("layout")
+@section("conteudo")
+  
+
+<!--troquei o nome do objeto de $categoria para $cat (fazer isso em view categoria) e tirei a frase
+<h>Categoria</h> -->
+
+
+<!--FAZER UM DIVISÂO DE COLUNA -->
+<div class="col-2"> 
+
+  @if(isset($listaCategorias)&& count($listaCategorias)>0 )
+  <div class="list-group"> 
+  
+          <a href="{{route('categoria') }}" class="list-group-item list-group-action " >Todas</a>
+      @foreach($listaCategorias as $cat)
+          <a href="{{route('categoria_por_id', ['idcategoria' => $cat->id]) }}" 
+            class="list-group-item list-group-item-action @if($cat->id === $idcategoria) active @endif"> 
+            {{$cat->categoria}}</a>
+
+      @endforeach
+  </ul>
+  </div>
+@endif
+</div>
+<!--USAR 2 COLUNA DAS 10 DISPONIVEL -->
+<div class="col-10"> 
+      @include("admin.pages.produtos._produtos", ['lista'=>$lista ])
+</div>
+
+  @endsection
+
+----NAO SURTIU EFEITO ESPERADO (marca texto azul )
+
+
+
+107-------AULA 9 -- --PARTE DO CARRINHO
+
+----------Fazer uma nova rota
+
+//ROTA DO CARRINHO
+
+//Não CONSEGUI POR ESTA ROTA
+//Route::match (['get', 'post'], '/{idproduto}/carrinho/adicionar', [Admin\ProdutoController::class, 'adicionarCarrinho'])->name('adicionar_carrinho');
+
+Route::get('/{idproduto}/carrinho/adicionar', 'Admin\ProdutoController@adicionarCarrinho')->name('adicionar_carrinho');
+
+
+---VAMOS EM VIEW _produtos (colocar link da rota e mudar nome de add=adicionar
+e passar como parametro o atributo idproduto que vai ser o id de $prod)
+
+@if(isset($lista))
+<!-- COLUNA (row) AGREGAR ITEM DENTRO DE UMA LINHA -->
+<div class="row">
+  @foreach ($lista as $prod)
+   
+<div class="col-3 mb-3">
+<div class="card">
+
+<img src="{{asset($prod->foto ) }}"    class="card-img-top" />
+<div class="card-body">
+<h6 class="card-title"> {{$prod->nome}} - R$ {{$prod->valor}}</h6>
+<a  href="{{route('adicionar_carrinho', ['idproduto' => $prod->id ]) }}" class="btn btn-sm btn-primary">Adicionar item</a>
+</div>
+
+</div>
+</div>
+@endforeach
+</div>
 @endif
 
 
+
+---Ja passa o ID no endereço mas ainda dar erro pois não tem o metodo 
+
 ---AGORA VAMOS EM ProdutoController CRIAR METODO adicionarcarrinho
 
-public function adicionarcarrinho ($idProduto = 0, Request $request) {
+public function adicionarCarrinho ($idProduto = 0, Request $request) {
 
   
-  //buscar o produto pelo ID
-  $prod=Produto::find($idProduto);
+                //buscar o produto pelo ID
+                $prod=Produto::find($idProduto);
+                
+                if($prod) {
+              //se o produto existir
+              
+              
+              //buscar da sessão o carrinho atual
+              $carrinho = session('cart', []);
+              // acrescenta na aray carrinho a variavel produto (atualiza)
+              array_push ($carrinho, $prod);
+              // mostra a sessão atual (grava em arquivo)
+              session(['cart' => $carrinho]);
+              
+                }
+                return redirect()->route('gerals.index');
+              }
+
+---------VAMOS CRIAR UMA ROTA PARA VISUALIZAR CARRINHO 
+//ROTAS VISUALIZAÇÃO DO CARRINHO atualizada (lista de produtos escolhidos)
+Route::get('/carrinho', 'Admin\ProdutoController@verCarrinho')->name('ver_carrinho');
+
+-----VAMOS EM View layout E COLOCAR A ROTA DE VISUALIZAR CARRINO NO ICONE CARRINHO
+
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="{{ route('ver_carrinho') }}" class="btn btn-sm"><i class="fas fa-edit"></i></a>
+        <!-- <a href="#" class="btn btn-primary">Carrinho PRODUTOS</a>-->
+    </ol>
   
-  if($prod) {
-//se o produto existir
+@stop
+
+@section('content')
+<div class="container">
+<div class="row">
+<!-- NESSA DIVI TERMOS UMA AREA COMUM A TODAS TELAS---->
+@yield("conteudo")
+</div>
+</div>
 
 
-//buscar da sessão o carrinho atual
-$carrinho = session('cart', []);
+@endsection
 
-array_push ($carrinho, $prod);
-session(['cart' => $carrinho]);
 
-  }
-  return redirect()->route('home');
-}
+---AGORA VAMOS FAZER O METODO verCarrinho NO ProdutoController
 
----------
+public function verCarrinho(Request $request)
+            {
+                $carrinho = session('cart', []);
+                dd($carrinho);
+                     
+                    
+            }
+
+-----JA eta vindo o dd (as dados)  
+
+108-----AULA 10 --
