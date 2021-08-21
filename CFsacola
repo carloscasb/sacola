@@ -4256,4 +4256,617 @@ public function verCarrinho(Request $request)
 
 -----JA eta vindo o dd (as dados)  
 
-108-----AULA 10 --
+108-----AULA 10 -- MELHORAR A VISUALIZAÇÂO DOS PRODUTOS NO CARRINHO
+
+ ---VAMOS EM ProdutoController E DEVOLVENDO NA VARIA data A SESSION Cart (carrinho)
+ E RETORNA (envia) NUMA View produtos.carrinho
+
+public function verCarrinho(Request $request)
+            {
+                $carrinho = session('cart', []);
+                //dd($carrinho);  TESTE
+                 
+                $data = ['cart' => $carrinho];
+
+                //return redirect()->route('ver_carrinho');
+
+                return view('admin.pages.produtos.carrinho', $data);
+                    
+            }
+
+-------AGORA CRIA UMA View produtos.carrinho
+numa if fazemos a verificação se existe uma variavel $cart sendo enviada (recebida e se existe
+essa variavel se ela é amior que 0), se Não existir mensagem e se existir Mostre numa tabela 
+todos os item do carrinho (cahamado de $item) atraves de um @foreach.
+Lembrando que $item são os objetos do produto (nome, foto, descrição, idcategoria)
+@extends("layout")
+@section("conteudo")
+  
+<h2>Carrinho meu</h2>
+
+<table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                </tr>
+
+            </thead>
+            <tbody>
+            <tbody>
+            @foreach($cart as $item)
+                  <tr>
+                      <td>{{ $item->nome }}</td>
+                 </tr>
+
+                 @endforeach  
+             </tbody>
+</table>
+
+
+@endsection
+
+------JA MOSTRA O Nome EM UMA TABELA , VAMOS COLOCAR OUTRS DAMPO NA TABELA
+@extends("layout")
+@section("conteudo")
+  
+<h2>Carrinho meu</h2>
+
+<table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Foto</th>
+                    <th>Valos</th>
+                    <th>Descrição</th>
+                </tr>
+
+            </thead>
+            <tbody>
+            <tbody>
+            @foreach($cart as $item)
+                  <tr>
+                      <td>{{ $item->nome }}</td>
+                      <td>{{ $item->foto }}</td>
+                      <td>{{ $item->valor }}</td>
+                      <td>{{ $item->descricao }}</td>
+                 </tr>
+
+                 @endforeach  
+             </tbody>
+</table>
+
+
+@endsection
+
+-------MELHORANDO ANDA MAUS VAMO COLOCAR A FOTO EM TAMANHO PEQUENO
+@extends("layout")
+@section("conteudo")
+  
+<h2>Carrinho meu</h2>
+
+<table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Foto</th>
+                    <th>Valos</th>
+                    <th>Descrição</th>
+                </tr>
+
+            </thead>
+            <tbody>
+            <tbody>
+            @foreach($cart as $item)
+                  <tr>
+                      <td>{{ $item->nome }}</td>
+                       <td><img src= " {{asset($item->foto) }}" width="50"  heigth="50" /></td>
+                      <td>{{ $item->valor }}</td>
+                      <td>{{ $item->descricao }}</td>
+                 </tr>
+
+                 @endforeach  
+             </tbody>
+</table>
+
+
+@endsection
+
+---FOTO FICOU GRANDE
+
+----VAMOS COLOCAR MAS UMA COLUNA CONTENDO UM LINK  , QUE FARA A EXCLUSÂO DO PRODUTO NO CARRINHO
+
+@extends("layout")
+@section("conteudo")
+  
+
+<table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Nome</th>
+                    <th>Foto</th>
+                    <th>Valos</th>
+                    <th>Descrição</th>
+                </tr>
+
+            </thead>
+            <tbody>
+            <tbody>
+            @foreach($cart as $item)
+                  <tr>
+                      <td>
+                          <a  href="#" class="btn btn-sm btn-primary"> <i class="fas fa-trash-alt"></i> </a>
+                      </td>
+
+                      <td>{{ $item->nome }}</td>
+                      <td><img src= " {{asset($item->foto) }}" width="50"  heigth="50" /></td>
+                      <td>{{ $item->valor }}</td>
+                      <td>{{ $item->descricao }}</td>
+                 </tr>
+
+                 @endforeach  
+             </tbody>
+</table>
+
+
+@endsection
+
+
+109-----AULA 11--------TELA DO USUARIO (cliente)----Vamos continuar
+
+------JA temos a View cliente.cadastrar VAMOS OTIMIZAR
+----COLOCAR LINK NO MENU LATERAL para view clientes.cadastrar (VAmos em config.adminLte)
+ 
+
+
+ [
+            'text' => 'pessoas',
+            'url'  => 'admin/pessoas',
+            'icon' => 'fas fa-fw fa-user',
+        ],
+
+        [
+            'text' => 'cliente',
+            'url'  => 'admin/clientes/cadastrar',
+            'icon' => 'fas fa-person-booth',
+        ],
+
+
+---- A rota cadastrar ja esta feita
+
+/*
+    ROTA CLIENTE 
+
+--NÃO CONSEGUI ACHAR O CONTROLLER CLIENTE PELA ROTER ABAIXO, Deixei a rota da forma antiga antiga
+use App\Http\Controllers\ClienteController;
+Route::match (['get', 'post'], '/cadastrar', [Admin\ClienteController::class, 'cadastrar'])->name('cadastrar');
+*/
+
+
+//use App\Http\Controllers\Controller\cadastrar;  (opcional)
+
+Route::match (['get', 'post'], '/admin/clientes/cadastrar', 'Admin\ClienteController@cadastrar')->name('cadastrar');
+
+
+------E O METODO Cadastar NO ClienteController tambem    
+    <?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class ClienteController extends Controller
+{
+    public function cadastrar(Request $request){
+
+        $data=[];
+        return view ('admin.pages.clientes.cadastrar', $data);
+    }
+}
+
+-----FAREMOS A VIEW clientes.cadastrar (formulario)
+
+@extends("layout")
+@section("conteudo")
+  
+<div class="col-12">
+
+      <!--  <div class="col-12"> -->
+        <h6>CADASTRAR CLIENTE</h6>
+        </div>
+
+<form action="#" method="post"> 
+    <div class="row">
+        <div class="col-6">
+        <div class="form-group">
+        Nome: <input type="text" name="nome" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-6">
+        <div class="form-group">
+        E-mail: <input type="email" name="email" class="form-control"><br>
+        </div>
+        </div>
+        <div class="col-6">
+        <div class="form-group">
+        CPF: <input type="cpf" name="cpf" class="form-control"><br>
+        </div>
+        </div>
+        <div class="col-6">
+        <div class="form-group">
+        Senha: <input type="password" name="password" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-12">
+        <div class="form-group">
+        Endereço: <input type="text" name="Endereço" class="form-control"><br>
+        </div>
+        </div>
+       
+        <div class="col-4">
+        <div class="form-group">
+        Cidade: <input type="text" name="Cidade" class="form-control"><br>  
+        </div>
+        </div>
+        <div class="col-4">
+        <div class="form-group">
+        CEP: <input type="text" name="CEP" class="form-control"><br>
+        </div>
+        </div>
+        <div class="col-4">
+        <div class="form-group">
+        Estado: <input type="text" name="Estado" class="form-control"><br>
+        </div>
+        </div>
+    </div>      
+        <input type="submit" value="Enviar Formulário" class="btn btn-primary btn-sm">
+    
+
+</form>
+ <!-- </div> -->
+
+@endsection
+
+----------  OBS:  Preciso tirar o carrinho
+
+
+110 ---AULA 12 -----VAMOS REMOVER ITEM DO CARRINHO
+
+----VAMOS NA View produtos.carrinho e coloca uma ROTA para EXCLUSÃO e passar para essa ROTA uma variavel
+ indice que vai conter o indice do carrinho {{route('carrinho_excluir', ['indice' => $indice])}}
+ que será pego (guardardo, armazenado) no @foreach($cart as $indice => $item)
+ OBS: o @foreach vai criar uma ohjeto ($item) mas vai colocar um inde nele 1,2, 3
+
+
+
+   @foreach($cart as $indice => $item)
+                  <tr>
+                      <td>
+                          <a  href="{{route('carrinho_excluir', ['indice' => $indice])}}" class="btn btn-sm btn-primary"> <i class="fas fa-trash-alt"></i> </a>
+                  </td>
+
+---------VAMOS FAZER A ROTA DE EXCLUSÃO
+
+//ROTAS DE EXCLUSÃO DO CARRINHO  (ESSE TIPO DE ROTA SO FUNCIONA SE DECLARAR A CLASS LA EM CIMA)
+/* use App\Http\Controllers\Admin\CategoriaController;
+use App\Http\Controllers\Admin\ProdutoController;
+*/
+Route::match (['get', 'post'], '/{indice}/excluircarrinho', [ProdutoController::class, 'excluirCarrinho'])->name('carrinho_excluir');
+
+OBS: JA MPSTRA NO RODAPE O INCE QUANDO COLOCAMOS O MOUSE
+
+
+---------VAMOS FAZER O METODO excluirCarrinho NO ProdutoController passando o $indice e o objeto Request
+
+ public function excluirCarrinho($indice, Request $request)
+            {
+               //BUSCAR CARRINHO
+                $carrinho = session('cart', []);
+                //dd($carrinho);  TESTE
+                 
+                //SE IXISTIR NO CARRINHO ITEM COM O INDID+CE PASSADO
+
+                if (isset($carrinho[$indice])) {
+                    //EXCLUA O ITEM
+                    unset($carrinho[$indice]);
+                }
+
+                //DEPOIS DE EXCLUIR O I|TEM CRIAR UMA NOVA SESÂO ATUAIAZADA (o cart é o novo carrinho)
+                session (["cart" => $carrinho]);
+               
+
+               // return view('admin.pages.produtos.carrinho');
+
+                return redirect()->route('ver_carrinho');
+                    
+            }
+
+111----AULA 13 ---CADASTRAR CLIENTE (***EXPLICANDO AQUI QUE CLIENTE È NA VERDADE A TABELA USUARIOS)
+
+---COMEÇAR PELA ROTA DE CADASTRO
+//ROTA CADASTRAR CLIENTE
+//SO CONSEGUI NESSA RITA DEPOIS QUE DECLAREI LA EM CIMA use App\Http\Controllers\ClienteController;
+Route::match (['get', 'post'], '/cliente/cadastrar', [ClienteController::class, 'cadastrarCliente'])->name('cadastrar');
+
+------VAMOS NA View clientes.cadastrar e chama a rota colocando o token do formulatio
+Toda requisição POST requer o token (@csrf) e depois vamos inserir alguns campos que esquecemos
+EM  CIMA Colocamos a mais O CPF e na parte de Endereço esquecemos do complemento e numero
+
+@extends("layout")
+@section("conteudo")
+  
+<div class="col-12">
+
+      <!--  <div class="col-12"> -->
+        <h6>CADASTRAR CLIENTE</h6>
+        </div>
+
+<form action="{{route('cadastrar_cliente')}}" method="post"> 
+@csrf
+    <div class="row">
+        <div class="col-6">
+        <div class="form-group">
+        Nome: <input type="text" name="nome" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-6">
+        <div class="form-group">
+        E-mail: <input type="email" name="email" class="form-control"><br>
+        </div>
+        </div>
+        <div class="col-6">
+        <div class="form-group">
+        CPF: <input type="cpf" name="cpf" class="form-control"><br>
+        </div>
+        </div>
+        <div class="col-6">
+        <div class="form-group">
+        Senha: <input type="password" name="password" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-8">
+        <div class="form-group">
+        Endereço: <input type="text" name="logradouro" class="form-control"><br>
+        </div>
+        </div>
+        
+        <div class="col-1">
+        <div class="form-group">
+        Número: <input type="text" name="numero" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-3">
+        <div class="form-group">
+        Complemento: <input type="text" name="complemento" class="form-control"><br>
+        </div>
+        </div>
+
+       
+        <div class="col-4">
+        <div class="form-group">
+        Cidade: <input type="text" name="cidade" class="form-control"><br>  
+        </div>
+        </div>
+
+        <div class="col-4">
+        <div class="form-group">
+        CEP: <input type="text" name="cep" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-4">
+        <div class="form-group">
+        Estado: <input type="text" name="estado" class="form-control"><br>
+        </div>
+        </div>
+    </div>      
+        <input type="submit" value="Enviar Formulário" class="btn btn-primary btn-sm">
+    
+
+</form>
+ <!-- </div> -->
+
+@endsection
+
+...
+
+----VAMOS EM MODEL USUARIO e Endereço  E CODIFICA O protected e Fillable --(Lembrando de tirar a referencia do RModel)
+
+----USUARIO
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Usuario extends Model
+{
+      // a tabel a que vai apontar é para tabela produtos
+   protected $table= "usuarios";
+   //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+   protected $fillable = [ 'email', 'cpf', 'password','nome'];
+}
+
+---ENDEREÇO
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Endereco extends Model
+{
+     // a tabel a que vai apontar é para tabela produtos
+   protected $table= "enderecos";
+   //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+   protected $fillable = [ 'logradouro', 'complemento', 'numero','cep', 'cidade','estado'];
+}
+
+
+
+------VAMOS EM ClienteController E FAZ O METODO cadastrarCliente , como na verdade é na tabela usuarios
+declaramos aqui a class usuario Em cima de ClienteController (use App\Models\Usuario;)
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Usuario;
+use App\Models\Endereco;
+
+class ClienteController extends Controller
+{
+.
+.
+.
+
+
+   public function cadastrarCliente(Request $request){
+
+      /*  TESTES
+        $nome = $request->input("nome", " ");
+      dd($nome);
+      
+      
+      //PEGAR TODOS OS VALORES DO FORMULARIO  --TESTE 2
+      $values = $request->all();
+      dd($values);
+      */
+
+      //Pega todos os valores
+      $values = $request->all();
+      //Estanciar o usuario
+      $usuario= new Usuario();
+       //chamar o metodo Fill passando a variavel $values (este metodo Fill só armazena o dados que estao no Fillape da model)
+      // Assim não precisa ficar armazenando individualmente ($ususario -> $nome = $request->input("nome", " "); )
+      //so faz individualmente se tiver um campo diferente do fillable, pode ser a caso do nosso Email/login
+       $usuario->Fill($values);  
+
+      //Estanciar o Endereço..Lembrando que podemos passar o $values (todos os registro) no metodo contructor
+      //exemplo abaixo diferentemente no de cima  que chamamos o metodo Fill
+       $endereco= new Endereco($values); 
+
+
+
+      //Testa com dd
+      dd($usuario, $endereco);
+
+       return redirect()-> route("cadastrar");
+    }
+
+
+
+
+112 ---AULA 14---CADASTRO  ----CONTINUAR E CORRIGIR ALGUM ERROS (como a tabela do BD que deixamos de incluir algum dados)
+
+CORRIGINDO---VAMOS OLHAR A MIGRATION usuarios - NA TABELA usuarios o Logim vai ser o CPF e vamos acrescentar email
+
+public function up()
+    {
+        Schema::create('usuarios', function (Blueprint $table) {
+            $table->increments("id");
+            $table->string("login", 100)->unique; // Vai ser o CPF
+            $table->string("password", 255);
+            $table->string("nome", 50);
+
+---A MIGRATION JÁ FOI RODADA (não tem mais JEITO)-- Estão vamos RODAR OUTRA Migratioan no cmd ALTERANDO
+            
+# php artisan make:migration alter_table_usuarios_add_column_email       
+
+---CRIOU OUTRA MIGRATION alter_table_usuarios_add_column_email 
+---VAMOS CODIFICAR-LA no METODO Up APENAS COM OS CAMPO QUE QUEREMOS ALTERAR OU INCLUIR
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AlterTableUsuariosAddColumnEmail extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+         //Não VAMOS CRIAR ENTÃO VAMOS TROCAR O METODO Create POR Table (que altera)
+        Schema::table('usuarios', function (Blueprint $table) {
+            $table->string("email", 150); // vamos criar somente um campo novo
+                        //->nullable() // Preenchimento não obrigatório
+                        //        ->after('password'); // Ordenado após a coluna "password"
+
+           
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        //
+    }
+}
+
+---FEITO ISSO, VAMOS RODAR A MIGRATIOM (somente as tabrlas ainda não criadas )
+
+# php artisan migrate
+
+---CONFERIR NO BANCO ---OK PERFEITO , INCLUIU
+
+---NA MODEL estava no fillable cep. COLOQUEI login
+   // a tabel a que vai apontar é para tabela produtos
+   protected $table= "usuarios";
+   //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+   protected $fillable = [ 'email', 'login', 'password','nome'];
+
+-----COMO MEXEU NO MODEL VAMOS TER QUE MEXER NO ClienteController (cadastrarCliente)
+
+public function cadastrarCliente(Request $request){
+
+      /*  TESTES
+        $nome = $request->input("nome", " ");
+      dd($nome);
+      
+      
+      //PEGAR TODOS OS VALORES DO FORMULARIO  --TESTE 2
+      $values = $request->all();
+      dd($values);
+      */
+
+      //Pega todos os valores
+      $values = $request->all();
+      //Estanciar o usuario
+      $usuario= new Usuario();
+       //chamar o metodo Fill passando a variavel $values (este metodo Fill só armazena o dados que estao no Fillape da model)
+      // Assim não precisa ficar armazenando individualmente ($ususario -> $nome = $request->input("nome", " "); )
+      //so faz individualmente se tiver um campo diferente do fillable, pode ser a caso do nosso Email/login
+       $usuario->Fill($values);  
+      // CUIDADO COM O BD- 
+      //Foi necessario  colocar manualmente o login porque la no formulario colocamos o name = "cpf" --VER SE È PRECISO MESMO 
+      ($ususario -> $login = $request->input("cpf", " ");
+
+      //Estanciar o Endereço..Lembrando que podemos passar o $values (todos os registro) no metodo contructor
+      //exemplo abaixo diferentemente no de cima  que chamamos o metodo Fill
+       $endereco= new Endereco($values); 
+      //Foi necessario  colocar manualmente o endereço porque la no formulario colocamos o name = "endereco" --VER SE È PRECISO MESMO 
+      ($ususario -> $logradouro = $request->input("endreco", " ");
+
+
+      //Testa com dd
+      dd($usuario, $endereco);
+
+       return redirect()-> route("cadastrar");
+    }
