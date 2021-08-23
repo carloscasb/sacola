@@ -4767,7 +4767,9 @@ class ClienteController extends Controller
 
 112 ---AULA 14---CADASTRO  ----CONTINUAR E CORRIGIR ALGUM ERROS (como a tabela do BD que deixamos de incluir algum dados)
 
-CORRIGINDO---VAMOS OLHAR A MIGRATION usuarios - NA TABELA usuarios o Logim vai ser o CPF e vamos acrescentar email
+-------CORRIGINDO ERROS E FAZENDO MODIFICÇÕES
+
+---VAMOS OLHAR A MIGRATION usuarios - NA TABELA usuarios o Logim vai ser o CPF e vamos acrescentar email
 
 public function up()
     {
@@ -4834,7 +4836,24 @@ class AlterTableUsuariosAddColumnEmail extends Migration
 
 -----COMO MEXEU NO MODEL VAMOS TER QUE MEXER NO ClienteController (cadastrarCliente)
 
-public function cadastrarCliente(Request $request){
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Usuario;
+use App\Models\Endereco;
+
+class ClienteController extends Controller
+{
+    public function cadastrar(Request $request){
+
+        $data=[];
+        return view ('admin.pages.clientes.cadastrar', $data);
+    }
+
+    public function cadastrarCliente(Request $request){
 
       /*  TESTES
         $nome = $request->input("nome", " ");
@@ -4856,17 +4875,772 @@ public function cadastrarCliente(Request $request){
        $usuario->Fill($values);  
       // CUIDADO COM O BD- 
       //Foi necessario  colocar manualmente o login porque la no formulario colocamos o name = "cpf" --VER SE È PRECISO MESMO 
-      ($ususario -> $login = $request->input("cpf", " ");
+      $usuario -> login = $request->input("cpf", "");
+      //Estanciar o Endereço..Lembrando que podemos passar o $values (todos os registro) no metodo contructor
+      //exemplo abaixo diferentemente no de cima  que chamamos o metodo Fill
+       $endereco= new Endereco($values); 
+      //Foi necessario  colocar manualmente o endereço porque la no formulario colocamos o name = "cpendereço" --VER SE È PRECISO MESMO 
+      $endereco -> logradouro = $request->input("endreco", " ");
+
+      /*Testa com dd
+      dd($usuario, $endereco);
+      */
+
+      //FAZER UM Try...catch PARA TRATAR OS ERROS
+
+      try {
+
+        $usuario->save();                       // salvar usuario
+        $endereco->usuario_id = $usuario->id;  // Relacionamento entre as tabelas pelo id
+        $endereco->save();                      // salvar endereço 
+
+      }catch (\exception $e){
+
+      }
+    
+         return redirect()-> route("cadastrar");
+
+    }
+}
+
+
+------OK PERFEITO, CADASTROU (precisa corregir criptografia de senha , campos Nulos - tem que olhar isso quando for fazer a miggration -
+Não OLHEI )---FAÇA COM ATENÇÂO PRINCIPALMENTE A TABELA E O BD
+
+
+113 ---AULA 15- IDENTIFICAMDO PROBLEMAS - modificação\melhorias
+
+---CAMPOS NULOS NA TABELA ENDEREÇO (vamos identificar os campos que podem ser nullable)
+public function up()
+    {
+        Schema::create('enderecos', function (Blueprint $table) {
+            $table->increments("id");
+            $table->string("logradouro")->nullable();
+            $table->string("numero")->nullable();
+            $table->string("cidade")->nullable();
+            $table->string("estado")->nullable();
+            $table->string("cep");
+            $table->string("complemento")->nullable();
+           
+            $table->integer("usuario_id")->unsigned();
+            
+            $table->timestamps();
+
+            $table->foreign("usuario_id")
+            ->references("id")->on("usuarios")
+            ->onDelete("cascade");
+
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('enderecos');
+    }
+}
+
+
+---NÃO QUEREMOS DROPAR O BANCO E NEM ADIANTA RODAR MIGRATE
+
+-----FAZER MASCARA PARA CPF na View clientes.cadastrar (vamos na view layout) ----NÃO DEU CERTO (nada aconteceu)
+---OBS: Seria melhor se tivesse formato na migratiom como cpf
+
+---vamos na view layout e incluir um @yield scriptjs 
+
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="{{ route('ver_carrinho') }}" class="btn btn-sm"><i class="fas fa-cart-arrow-down"></i></a>
+        <!-- <a href="#" class="btn btn-primary">Carrinho PRODUTOS</a>-->
+    </ol>
+  
+@stop                    
+@yield("scriptjs")
+@section('content')
+<div class="container">
+<div class="row">
+<!-- NESSA DIVI TERMOS UMA AREA COMUM A TODAS TELAS---->
+@yield("conteudo")
+</div>
+</div>
+
+
+@endsection
+
+----NA view clientes.Cadastrar VAMOS COLOCAR uma @section("scriptjs")...@endsection
+---VAMOS no site cdnjs.com BUSCA por jquery.mask e pegar script de MASCARA COPIA E COLOCA DENTRO DA SECTION
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js" integrity="sha512-pHVGpX7F/27yZ0ISY+VVjyULApbDlD0/X0rgGbTqCE7WFW5MezNTWG/dnhtbBuICzsd0WQPgpE4REBLv+UqChw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+---VAI NO SITE cdn.jquery (https://code.jquery.com/) e COPIAR A jQuery Core 3.6.0  em minufid e COLA DENTRO DA SECTION
+-----ASSIM
+@extends("layout")
+@section("scriptjs")
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js" integrity="sha512-pHVGpX7F/27yZ0ISY+VVjyULApbDlD0/X0rgGbTqCE7WFW5MezNTWG/dnhtbBuICzsd0WQPgpE4REBLv+UqChw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+@endsection  
+@section("conteudo")
+
+<div class="col-12">
+.
+.
+.
+
+------AGORA VAMOS ATRIBUIR UM ID PARA O CAMPO cpf no formulario da mesma pagina clientes.cadastrar
+
+        <div class="col-6">
+        <div class="form-group">
+        CPF: <input type="cpf" name="cpf" id="cpf" class="form-control"><br>
+        </div>
+        </div>
+
+-----POR ULTINO COLOCAR UM script NA PROPRIA SECTION scriptjs  da view clientes.cadastrar
+<script>
+$(function () {
+    // JQUERY ---ONLOAD----AO carregar a pagina
+    // Procure o seletor do CPF (elemento cujo ID seja igual cpf) e aplique a mascara de acordo com o pairtn
+    $("#cpf").mask("000.000.000-00")
+    
+})
+
+</script>
+
+-----A PAGINA FICA ASSIM 
+@extends("layout")
+@section("scriptjs")
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js" integrity="sha512-pHVGpX7F/27yZ0ISY+VVjyULApbDlD0/X0rgGbTqCE7WFW5MezNTWG/dnhtbBuICzsd0WQPgpE4REBLv+UqChw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+$(function () {
+    // JQUERY ---ONLOAD----AO carregar a pagina
+    // Procure o seletor do CPF (elemento cujo ID seja igual cpf) e aplique a mascara de acordo com o pairtn
+    $("#cpf").mask("000.000.000-00")
+    $("#cep").mask("00000-00")
+    
+})
+
+</script>
+@endsection  
+
+@section("conteudo")
+
+<div class="col-12">
+
+      <!--  <div class="col-12"> -->
+        <h6>CADASTRAR CLIENTE</h6>
+        </div>
+
+<form action="{{route('cadastrar_cliente')}}" method="post"> 
+@csrf
+    <div class="row">
+        <div class="col-6">
+        <div class="form-group">
+        Nome: <input type="text" name="nome" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-6">
+        <div class="form-group">
+        E-mail: <input type="email" name="email" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-6">
+        <div class="form-group">
+        CPF: <input type="cpf" name="cpf" id="cpf" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-6">
+        <div class="form-group">
+        Senha: <input type="password" name="password" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-8">
+        <div class="form-group">
+        Endereço: <input type="text" name="logradouro" class="form-control"><br>
+        </div>
+        </div>
+        
+        <div class="col-1">
+        <div class="form-group">
+        Número: <input type="text" name="numero" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-3">
+        <div class="form-group">
+        Complemento: <input type="text" name="complemento" class="form-control"><br>
+        </div>
+        </div>
+
+       
+        <div class="col-4">
+        <div class="form-group">
+        Cidade: <input type="text" name="cidade" class="form-control"><br>  
+        </div>
+        </div>
+
+        <div class="col-4">
+        <div class="form-group">
+        CEP: <input type="text" name="cep" id="cep" class="form-control"><br>
+        </div>
+        </div>
+
+        <div class="col-4">
+        <div class="form-group">
+        Estado: <input type="text" name="estado" class="form-control"><br>
+        </div>
+        </div>
+    </div>      
+        <input type="submit" value="Enviar Formulário" class="btn btn-primary btn-sm">
+    
+
+</form>
+ <!-- </div> -->
+
+@endsection
+
+----------NÃO DEU CERTO (nada aconteceu) - ACHO MELHOR TENTAR VALIDAR-seria melhor se tivesse formato na migratiom como cpf
+
+
+---------VAMOS FAZER UM TRATAMENTO NA GRAVAÇÂO DOS DADOS PARA O BD, FAZENDO UMA Try...catch e UM DB::
+----no ClienteController CODIFICAMOS E FICA ASSI o CODIFICO
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Usuario;
+use App\Models\Endereco;
+
+class ClienteController extends Controller
+{
+    public function cadastrar(Request $request){
+
+        $data=[];
+        return view ('admin.pages.clientes.cadastrar', $data);
+    }
+
+    public function cadastrarCliente(Request $request){
+
+      /*  TESTES
+        $nome = $request->input("nome", " ");
+      dd($nome);
+      
+      
+      //PEGAR TODOS OS VALORES DO FORMULARIO  --TESTE 2
+      $values = $request->all();
+      dd($values);
+      */
+
+      //Pega todos os valores
+      $values = $request->all();
+      //Estanciar o usuario
+      $usuario= new Usuario();
+       //chamar o metodo Fill passando a variavel $values (este metodo Fill só armazena o dados que estao no Fillape da model)
+      // Assim não precisa ficar armazenando individualmente ($ususario -> $nome = $request->input("nome", " "); )
+      //so faz individualmente se tiver um campo diferente do fillable, pode ser a caso do nosso Email/login
+       $usuario->Fill($values);  
+      // CUIDADO COM O BD- 
+      //Foi necessario  colocar manualmente o login porque la no formulario colocamos o name = "cpf" --VER SE È PRECISO MESMO 
+      $usuario -> login = $request->input("cpf", "");
+      //Estanciar o Endereço..Lembrando que podemos passar o $values (todos os registro) no metodo contructor
+      //exemplo abaixo diferentemente no de cima  que chamamos o metodo Fill
+       $endereco= new Endereco($values); 
+      //Foi necessario  colocar manualmente o endereço porque la no formulario colocamos o name = "cpendereço" --VER SE È PRECISO MESMO 
+      $endereco -> logradouro = $request->input("endreco", " ");
+
+      /*Testa com dd
+      dd($usuario, $endereco);
+      */
+
+      //FAZER UM Try...catch PARA TRATAR OS ERROS
+      //FAZER \BD:: para GARANTIR A TRANSAÇÂO
+      try {
+        \DB::beginTransaction();                // Inicar a transação
+        $usuario->save();                       // salvar usuario
+        $endereco->usuario_id = $usuario->id;  // Relacionamento entre as tabelas pelo id
+        $endereco->save();                      // salvar endereço 
+        \DB::commit();                           // Confirmando a transação
+      }catch (\exception $e){
+        // Tratar erro
+
+        \DB::rollBack();                          // Cancela a transação
+
+      }
+    
+         return redirect()-> route("cadastrar");
+
+
+    }
+}
+
+
+---MAIS UM ERRO É A CRIPTOGRAFIA DA SENHA (modificação\melhorias) (esse erros se tivemos atençaõ nas migration não ocorremos)
+--VAMOS EM ClienteController como recebemos os dados do usuario direta ja sem a cripotografia vamos criptografar a senha
+--A ClienteController FICA ASSIM 
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Usuario;
+use App\Models\Endereco;
+
+class ClienteController extends Controller
+{
+    public function cadastrar(Request $request){
+
+        $data=[];
+        return view ('admin.pages.clientes.cadastrar', $data);
+    }
+
+    public function cadastrarCliente(Request $request){
+
+      /*  TESTES
+        $nome = $request->input("nome", " ");
+      dd($nome);
+      
+      
+      //PEGAR TODOS OS VALORES DO FORMULARIO  --TESTE 2
+      $values = $request->all();
+      dd($values);
+      */
+
+      //Pega todos os valores
+      $values = $request->all();
+      //Estanciar o usuario
+      $usuario= new Usuario();
+       //chamar o metodo Fill passando a variavel $values (este metodo Fill só armazena o dados que estao no Fillape da model)
+      // Assim não precisa ficar armazenando individualmente ($ususario -> $nome = $request->input("nome", " "); )
+      //so faz individualmente se tiver um campo diferente do fillable, pode ser a caso do nosso Email/login
+       $usuario->Fill($values);  
+      // CUIDADO COM O BD- 
+      //Foi necessario  colocar manualmente o login porque la no formulario colocamos o name = "cpf" --VER SE È PRECISO MESMO 
+      $usuario -> login = $request->input("cpf", "");
+
+      /*AQUI VAMOS FAZER UM MODIFICAÇÂO CRIPTOGRAFANDO A SENHA DO USUARIO - Não seria preciso se Tivessemos feita  a criptografia 
+      na Migration que vai para o BD
+       */
+      $senha = $request->input("password", "");   // Regastar a senha
+
+       // O USUARIO PASSWORD recebe a Biblioteca Hast do proprio laravel e a funão mask passando a senha
+      $usuario->password =\Hash::make($senha);  // CRIPTOGRAFA a senha
+
+
 
       //Estanciar o Endereço..Lembrando que podemos passar o $values (todos os registro) no metodo contructor
       //exemplo abaixo diferentemente no de cima  que chamamos o metodo Fill
        $endereco= new Endereco($values); 
-      //Foi necessario  colocar manualmente o endereço porque la no formulario colocamos o name = "endereco" --VER SE È PRECISO MESMO 
-      ($ususario -> $logradouro = $request->input("endreco", " ");
+      //Foi necessario  colocar manualmente o endereço porque la no formulario colocamos o name = "logradouro" --VER SE È PRECISO MESMO 
+      $endereco -> logradouro = $request->input("logradouro", " ");
 
-
-      //Testa com dd
+      /*Testa com dd
       dd($usuario, $endereco);
+      */
 
-       return redirect()-> route("cadastrar");
+      //FAZER UM Try...catch PARA TRATAR OS ERROS
+      //FAZER \BD:: para GARANTIR A TRANSAÇÂO
+      try {
+        \DB::beginTransaction();                // Inicar a transação
+        $usuario->save();                       // salvar usuario
+        $endereco->usuario_id = $usuario->id;  // Relacionamento entre as tabelas pelo id
+        $endereco->save();                      // salvar endereço 
+        \DB::commit();                           // Confirmando a transação
+      }catch (\exception $e){
+        // Tratar erro
+
+        \DB::rollBack();                          // Cancela a transação
+
+      }
+    
+         return redirect()-> route("cadastrar");
+
     }
+}
+
+
+------OK PERFEITO --CRIPTOGRAFOU
+
+
+114------AULA 16 ---AINDA NAS MELHORIA DA PERFORMACE DA APLICAÇÃO
+
+--VAMOS CRIAR UMA PASTA DENTRO DE App (app.Services) e UMA CLASSE DE SERVIÇO  DENTRO DESTA PASTA ClienteService.php
+--- FAZER UMA CLASSE QUE CHAMAREMOS DE ClienteService e faz a parte de cima DEclarações e  TRAZ o try ... catch de 
+Gravação do usuario DA ClienteController (colocar na classe de serviço  para a possibelmnete de reaproveitamento de outra 
+função)
+<?php
+
+namespace App\Service;
+
+
+use App\Models\Usuario;
+use App\Models\Endereco;
+
+class ClienteService extends Controller {
+
+}
+
+-----E VAMOS CRIAR UMA função salvarUsuario trazendo o try...catch de ClienteController (Que fica sem)
+---- FAZENDO AS MODIFICALÇOES CARREGAR O LOg (use Log;) EM CIMA , e coloca um log de erro e fazer que a função 
+retorne um array com status e mensagem (ok OU erro)
+<?php
+
+namespace App\Service;
+use App\Models\Usuario;
+use App\Models\Endereco;
+use Log;
+
+class ClienteService  {
+
+        // função passando um user  e um endereço
+    public function salvarUsuario(Usuario $user, Endereco $endereco){
+        
+        // VEIO DO ClienteController
+        try {
+            \DB::beginTransaction();                // Inicar a transação
+            $user->save();                       // salvar usuario
+            $endereco->usuario_id = $user->id;  // Relacionamento entre as tabelas pelo id
+            $endereco->save();                      // salvar endereço 
+            \DB::commit();                           // Confirmando a transação
+
+            //função retorne um array com status e mensagem (ok OU erro)
+            return [ 'status' => 'ok', 'message' => 'Usuario Cadastrado com Sucesso' ];
+
+          }catch (\exception $e){
+            // Tratar erro
+            // coloca um log de erro
+            \log::error("ERRO", ['file' => 'ClienteService.salvarUsuario',
+             'message'=> $e -> getMessage()]);
+            \DB::rollBack();                          // Cancela a transação
+
+            return [ 'status' => 'err', 'message' => 'Usuario  não pode ser Cadastrado' ];
+    
+          }
+
+    }
+}
+---------- *** AGORA VAMOS EM ClienteController (É LA A LOGICA CHAMADA) -ESTA SEM  try ... catch-
+ e DECLARAMOS A CLASSE ClienteService (Use App\Services\ClienteService;)
+
+ <?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Usuario;
+use App\Models\Endereco;
+Use App\Services\ClienteService;
+
+
+class ClienteController extends Controller
+{
+    public function cadastrar(Request $request){
+
+        $data=[];
+        return view ('admin.pages.clientes.cadastrar', $data);
+    }
+
+    public function cadastrarCliente(Request $request){
+
+      /*  TESTES
+        $nome = $request->input("nome", " ");
+      dd($nome);
+      
+      
+      //PEGAR TODOS OS VALORES DO FORMULARIO  --TESTE 2
+      $values = $request->all();
+      dd($values);
+      */
+
+      //Pega todos os valores
+      $values = $request->all();
+      //Estanciar o usuario
+      $usuario= new Usuario();
+       //chamar o metodo Fill passando a variavel $values (este metodo Fill só armazena o dados que estao no Fillape da model)
+      // Assim não precisa ficar armazenando individualmente ($ususario -> $nome = $request->input("nome", " "); )
+      //so faz individualmente se tiver um campo diferente do fillable, pode ser a caso do nosso Email/login
+       $usuario->Fill($values);  
+      // CUIDADO COM O BD- 
+      //Foi necessario  colocar manualmente o login porque la no formulario colocamos o name = "cpf" --VER SE È PRECISO MESMO 
+      $usuario -> login = $request->input("cpf", "");
+
+      /*AQUI VAMOS FAZER UM MODIFICAÇÂO CRIPTOGRAFANDO A SENHA DO USUARIO - Não seria preciso se Tivessemos feita  a criptografia 
+      na Migration que vai para o BD
+       */
+      $senha = $request->input("password", "");   // Regastar a senha
+
+       // O USUARIO PASSWORD recebe a Biblioteca Hast do proprio laravel e a funão mask passando a senha
+      $usuario->password =\Hash::make($senha);  // CRIPTOGRAFA a senha
+
+
+
+      //Estanciar o Endereço..Lembrando que podemos passar o $values (todos os registro) no metodo contructor
+      //exemplo abaixo diferentemente no de cima  que chamamos o metodo Fill
+       $endereco= new Endereco($values); 
+      //Foi necessario  colocar manualmente o endereço porque la no formulario colocamos o name = "logradouro" --VER SE È PRECISO MESMO 
+      $endereco -> logradouro = $request->input("logradouro", " ");
+
+      /*Testa com dd
+      dd($usuario, $endereco);
+      */
+
+      //FAZER UM Try...catch PARA TRATAR OS ERROS
+      //FAZER \BD:: para GARANTIR A TRANSAÇÂO
+      /* LEVADO PARA app.Service.services.php NA CLASSE salvarUsuario
+      try {
+        \DB::beginTransaction();                // Inicar a transação
+        $usuario->save();                       // salvar usuario
+        $endereco->usuario_id = $usuario->id;  // Relacionamento entre as tabelas pelo id
+        $endereco->save();                      // salvar endereço 
+        \DB::commit();                           // Confirmando a transação
+      }catch (\exception $e){
+        // Tratar erro
+
+        \DB::rollBack();                          // Cancela a transação
+
+      }
+    */
+
+
+      //Estanciar o ClienteService que veio la de Services
+        $clienteService  = new ClienteService(); 
+       //CHAMAR O METODO salvarUsuario da SERVICES e passa o endereço e o cliente para  receber o resultado
+      $result = $clienteService ->salvarUsuario ( $usuario , $endereco);
+      /*Testa com dd */
+      dd($result);
+     
+
+
+         return redirect()-> route("cadastrar");
+
+    }
+}
+
+
+----SEU CERTO no  dd($result); Sw der errado vai criar um Log em 
+Storage.logs.laravel.log
+
+---AGORA VAMOS EM ClienteService E VAMOS BUSCAR UM USUARIO QUE TENHA login QUE ESTEJA CADASTRADO NO BANCO PARA
+LIBERAR LOGAR SE NÃO EXISTIR NÃO LOGA e não INCLUIR
+
+<?php
+
+namespace App\Services;
+use App\Models\Usuario;
+use App\Models\Endereco;
+use Log;
+
+class ClienteService  {
+
+        // função passando um usuario e um endereço
+          public function salvarUsuario(Usuario $user, Endereco $endereco){
+        
+        // VEIO DO ClienteController
+        try {
+
+            // VAMOS BUSCAR UM USUARIO QUE TENHA login QUE ESTEJA CADASTRADO NO BANCO (evitar duplicidade)
+            $dbUsuario = Usuario::where( "login", $user->login)->first() ;
+            //Se  existir , bloqueio a inclusão
+            if( $dbUsuario){
+              return [ 'status' => 'err', 'message' => 'Login já cadastrado no sistema' ];
+            }
+
+            \DB::beginTransaction();                // Inicar a transação
+            $user->save();                       // salvar usuario
+            $endereco->usuario_id = $user->id;  // Relacionamento entre as tabelas pelo id
+            $endereco->save();                      // salvar endereço 
+            \DB::commit();                           // Confirmando a transação
+
+            //função retorne um array com status e mensagem (ok OU erro)
+            return [ 'status' => 'ok', 'message' => 'Usuario Cadastrado com Sucesso' ];
+
+          }catch (\exception $e){
+            // Tratar erro
+            // coloca um log de erro
+            \Log::error("ERRO", ['file' => 'ClienteService.salvarUsuario',
+             'message'=> $e -> getMessage()]);
+            \DB::rollBack();                          // Cancela a transação
+
+            return [ 'status' => 'err', 'message' => 'Usuario  não pode ser Cadastrado' ];
+    
+          }
+
+    }
+}
+
+--------MAIS UMA MODIFICAÇÂO QUE IREMOS FAZER É NO ClienteControlller e PEGAR O RESILTADO QUE VEIO DA PAGINA LAYOUT
+GRAVA numa session, esperando o que veio do reultado da pagina do layout que pode ser   // ok  e 'Login já cadastrado no sistema'
+// err  e 'Usuario  não pode ser Cadastrado'
+
+
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Usuario;
+use App\Models\Endereco;
+Use App\Services\ClienteService;
+
+
+class ClienteController extends Controller
+{
+    public function cadastrar(Request $request){
+
+        $data=[];
+        return view ('admin.pages.clientes.cadastrar', $data);
+    }
+
+    public function cadastrarCliente(Request $request){
+
+      /*  TESTES
+        $nome = $request->input("nome", " ");
+      dd($nome);
+      
+      
+      //PEGAR TODOS OS VALORES DO FORMULARIO  --TESTE 2
+      $values = $request->all();
+      dd($values);
+      */
+
+      //Pega todos os valores
+      $values = $request->all();
+      //Estanciar o usuario
+      $usuario= new Usuario();
+       //chamar o metodo Fill passando a variavel $values (este metodo Fill só armazena o dados que estao no Fillape da model)
+      // Assim não precisa ficar armazenando individualmente ($ususario -> $nome = $request->input("nome", " "); )
+      //so faz individualmente se tiver um campo diferente do fillable, pode ser a caso do nosso Email/login
+       $usuario->Fill($values);  
+      // CUIDADO COM O BD- 
+      //Foi necessario  colocar manualmente o login porque la no formulario colocamos o name = "cpf" --VER SE È PRECISO MESMO 
+      $usuario -> login = $request->input("cpf", "");
+
+      /*AQUI VAMOS FAZER UM MODIFICAÇÂO CRIPTOGRAFANDO A SENHA DO USUARIO - Não seria preciso se Tivessemos feita  a criptografia 
+      na Migration que vai para o BD
+       */
+      $senha = $request->input("password", "");   // Regastar a senha
+
+       // O USUARIO PASSWORD recebe a Biblioteca Hast do proprio laravel e a funão mask passando a senha
+      $usuario->password =\Hash::make($senha);  // CRIPTOGRAFA a senha
+
+
+
+      //Estanciar o Endereço..Lembrando que podemos passar o $values (todos os registro) no metodo contructor
+      //exemplo abaixo diferentemente no de cima  que chamamos o metodo Fill
+       $endereco= new Endereco($values); 
+      //Foi necessario  colocar manualmente o endereço porque la no formulario colocamos o name = "logradouro" --VER SE È PRECISO MESMO 
+      $endereco -> logradouro = $request->input("logradouro", " ");
+
+      /*Testa com dd
+      dd($usuario, $endereco);
+      */
+
+      //FAZER UM Try...catch PARA TRATAR OS ERROS
+      //FAZER \BD:: para GARANTIR A TRANSAÇÂO
+      /* LEVADO PARA app.Service.services.php NA CLASSE salvarUsuario
+      try {
+        \DB::beginTransaction();                // Inicar a transação
+        $usuario->save();                       // salvar usuario
+        $endereco->usuario_id = $usuario->id;  // Relacionamento entre as tabelas pelo id
+        $endereco->save();                      // salvar endereço 
+        \DB::commit();                           // Confirmando a transação
+      }catch (\exception $e){
+        // Tratar erro
+
+        \DB::rollBack();                          // Cancela a transação
+
+      }
+    */
+
+
+      //Estanciar o ClienteService que veio la de Services
+        $clienteService  = new ClienteService(); 
+       //CHAMAR O METODO salvarUsuario da SERVICES e passa o endereço e o cliente para  receber o resultado
+      $result = $clienteService ->salvarUsuario ( $usuario , $endereco);
+      /*Testa com dd 
+      dd($result);
+       */
+
+        // Pegar resultado da pagina
+        $message =$result["message"];
+        //Pega o status da messagem  (ok ou err)
+        $status =$result["status"];
+        //GRAVA numa session, esperando o que veio do reultado da pagina do layout que pode ser
+        // ok  e 'Login já cadastrado no sistema'
+        // err  e 'Usuario  não pode ser Cadastrado'
+        $request ->session()->flash($status, $message);
+        // VAMOS NA PAGINA LAYOUT
+        
+         return redirect()-> route("cadastrar");
+
+    }
+}
+
+
+-----VAMOS LAYOUT E MODIFICAR COLOCANDO UMA CONDUÇÃO PARA mensagem
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <a  href="{{ route('ver_carrinho') }}" class="btn btn-sm"><i class="fas fa-cart-arrow-down"></i></a>
+        <!-- <a href="#" class="btn btn-primary">Carrinho PRODUTOS</a>-->
+    </ol>
+  
+@stop                    
+@yield("scriptjs")
+@section('content')
+
+<!--//Se por acaso tiver uma mensagem de erro  -->
+@if($message = session::get("err"))
+<div class="col-12">
+<div class="alert alert-danger" >{{$message}} </div>
+</div>
+@endif
+
+<!--//Se por acaso tiver uma mensagem de ok  -->
+@if($message = session::get("ok"))
+<div class="col-12">
+<div class="alert alert-primary" >{{$message}} </div>
+</div>
+@endif
+
+
+<div class="container">
+<div class="row">
+<!-- NESSA DIVI TERMOS UMA AREA COMUM A TODAS TELAS---->
+@yield("conteudo")
+</div>
+</div>
+
+
+@endsection
+
+
+------OK PERFEITO, CADASTROU
+
+115-----AULA !7------
+
