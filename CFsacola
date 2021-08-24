@@ -5642,5 +5642,202 @@ class ClienteController extends Controller
 
 ------OK PERFEITO, CADASTROU
 
-115-----AULA !7------
+115-----AULA !7------LOGIN USUARIO
+---CRIAR ROTA
+OBS: --DECLARAR LA EM CIMA (use App\Http\Controllers\Admin\UsuarioController;)
+
+<?php
+
+use App\Http\Controllers\Admin\CategoriaController;
+use App\Http\Controllers\Admin\ProdutoController;
+use App\Http\Controllers\Admin\ClienteController;
+use App\Http\Controllers\Admin\UsuarioController;
+
+
+//ROTA CADASTRAR CLIENTE
+//SO CONSEGUI NESSA RITA DEPOIS QUE DECLAREI LA EM CIMA use App\Http\Controllers\ClienteController;
+Route::match (['get', 'post'], '/cliente/cadastrar', [ClienteController::class, 'cadastrarCliente'])->name('cadastrar_cliente');
+
+//ROTA DE LOGIN CLIENTE (usuario)
+Route::match (['get', 'post'], '/logar', [UsuarioController::class, 'logar'])->name('logar');
+
+-----CRIAR UsuarioController
+# php artisan make:controller Admin\UsuarioController
+
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class UsuarioController extends Controller
+{
+    public function logar(Request $request)
+    {
+        $data = [];
+        return view('admin.pages.clientes.logar', $data);
+    }
+}
+
+
+------NA VIEW LAYOUT COLOCAR MAIS UM LINK COM A ROTA DE LOGAR
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('logar') }}" class="active">Logar</a></li>
+        <a  href="{{ route('ver_carrinho') }}" class="btn btn-sm"><i class="fas fa-cart-arrow-down"></i></a>
+        <!-- <a href="#" class="btn btn-primary">Carrinho PRODUTOS</a>-->
+    </ol>
+  
+@stop  
+.
+.
+.
+
+-------CRIAR A VIEW admin.pages.clientes.logar
+@extends("layout")
+@section("conteudo")
+
+        <div class="col-12">
+        <h2 class="mb-6">Logar no Sistema</h2>
+        
+        <form action="{{route('logar')}}" method="post"> 
+        @csrf
+        <div class="form-group">
+        Login: <input type="text" name="login" class="form-control"><br>
+        </div>
+
+        <div class="form-group">
+        Senha: <input type="password" name="senha" class="form-control"><br>
+        </div>
+        <input type="submit" value="Logar" class="btn btn-primary ">
+    
+        </form >
+        
+        </div>
+
+
+
+@endsection
+
+
+116 ---AULA 18 --CODIFICAR LOGIN
+---VAMOS EM Config.auth e em Provider o LARAVEL TEM COMO PADRÃO User e NÓS USAREMOS A TABELA Usuario
+então vamos TROCAR
+
+---PADRÃO
+
+ 'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
+
+------USAREMOS A DE BAIXO
+
+'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Usuario::class,
+        ],
+
+-----NA CLass Usuario LA NA MODEL USUARIO e faremos alguma modificação     
+VAMOS DECLARAR  E IMPLEMENTAR use Illuminate\Contracts\Auth\Authenticatable;
+ALEM DE IMPEMETAR AS FUNÇÂO DELE (06 funções)
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+use Illuminate\Contracts\Auth\Authenticatable;
+
+class Usuario extends Model implements Authenticatable
+{
+      // a tabel a que vai apontar é para tabela produtos
+   protected $table= "usuarios";
+   //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+   protected $fillable = [ 'email', 'login', 'password','nome'];
+
+
+   public function getAuthIdentifierName(){
+      return $this->getKey();
+   }
+   public function getAuthIdentifier(){
+      return $this->login;
+   }
+   public function getAuthPassword(){
+      return $this->password;
+   }
+   public function getRememberToken(){
+      // USARIAMOS SE FOSSE RECUPERAR SENHA
+   }
+   public function setRememberToken($value){
+      // USARIAMOS SE FOSSE RECUPERAR SENHA      
+   }
+   public function getRememberTokenName(){
+      // USARIAMOS SE FOSSE RECUPERAR SENHA
+   }
+
+}
+
+
+-----AGORA VALTAMOS EM UsuarioController E DECLARAMOS Auth (Use Auth;) LA EM CIMA
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+Use Auth;
+
+class UsuarioController extends Controller
+{
+    public function logar(Request $request)
+    {
+        $data = [];
+
+        //Condicionamos, se o usuario entrar nessa condição é porqie apertou o botão
+        if($request->isMethod("POST")  ) {
+            //Regstar os dados do usuario (login e senha digitada)
+            $login= $request->input("login");
+            $senha= $request->input("senha");
+            
+            //Criar uma Variavel tipo array e coloca os dados dentro ---- senha espera password
+            $credencial = ['login' => $login, 'password' => $senha];
+            //Vamos LOGAR
+            if(Auth::attempt($credencial)) {
+                
+                dd("logado");
+                /*testar
+                return redirect()->route("gerals");*/
+                }else{
+                    
+                dd("Login Invalido");
+                   /*testar 
+                    $request->session()->flash("err", "Seha ou usuario Invalido");
+                    return redirect()->route("logar");*/
+
+                }
+
+        }
+
+        return view('admin.pages.clientes.logar', $data);
+    }
+}
+
+
+
+
+
+
+
 
