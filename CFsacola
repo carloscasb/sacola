@@ -5834,7 +5834,610 @@ class UsuarioController extends Controller
     }
 }
 
+-----DEU PROBLEMA QUANDO MANDA PARA ROTA --ERRO 1045
 
+----OBS: OLHAR  117B
+
+
+
+117-----AULA !9-----CONTINUAR NO LOGIN
+
+--VOLTAMOS EM pAGINA DO layout e coloacAR UMA MENSAGEM DE BOAS VINDAS
+
+<!--// mensagem de Boas vindas para o ususario logado  -->
+@if(\Auth::User())
+<div class="col-12">
+<div class="text-rigth" >SEja bem vinvo {{\Auth::User()->nome}}, <a href="">Sair</a> </div>
+</div>
+@endif
+
+<!--//Se por acaso tiver uma mensagem de erro  -->
+@if($message = Session::get("err"))
+
+-----E INIBIR O MENU LOGAR SOMENTE PARA QUEM NAO TIVER LOGADO
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        @if(!\Auth::User())
+        <li class="breadcrumb-item active"><a href="{{ route('logar') }}" class="active">Logar</a></li>
+        @else
+        <li class="breadcrumb-item active"><a href="{{ route('logar') }}" class="active">Logout</a></li>
+        @endif
+        <a  href="{{ route('ver_carrinho') }}" class="btn btn-sm"><i class="fas fa-cart-arrow-down"></i></a>
+        <!-- <a href="#" class="btn btn-primary">Carrinho PRODUTOS</a>-->
+    </ol>
+
+-------------  PRECISAMOS CRIAR MA ROTA SAIR   
+
+//ROTA DE SAIR CLIENTE (usuario)
+Route::get('/sair', [UsuarioController::class, 'sair'])->name('sair');
+
+-----E EDITAR O LAYOUT novamente
+
+@extends('adminlte::page')
+
+@section('title', 'Dashboard')
+
+@section('content_header')
+<ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('gerals.index') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('pessoas.index') }}" class="active">Pessoas</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('categoria') }}" class="active">Categoria</a></li>
+        @if(!\Auth::User())
+        <li class="breadcrumb-item active"><a href="{{ route('logar') }}" class="active">Logar</a></li>
+        @else
+        <li class="breadcrumb-item active"><a href="{{ route('sair') }}" class="active">Logout</a></li>
+        @endif
+        <a  href="{{ route('ver_carrinho') }}" class="btn btn-sm"><i class="fas fa-cart-arrow-down"></i></a>
+        <!-- <a href="#" class="btn btn-primary">Carrinho PRODUTOS</a>-->
+    </ol>
+  
+@stop                    
+@yield("scriptjs")
+@section('content')
+
+<!--// mensagem de Boas vindas para o ususario logado  -->
+@if(\Auth::User())
+<div class="col-12">
+<div class="text-rigth" >SEja bem vinvo {{\Auth::User()->nome}}, <a href="{{ route('sair') }}">Sair</a> </div>
+</div>
+@endif
+
+<!--//Se por acaso tiver uma mensagem de erro  -->
+@if($message = Session::get("err"))
+
+.
+.
+.
+
+117B--------TEMOS QUE FAZER O MERODO Sair EM ProdutoController
+
+public function Sair()
+    {
+       // DEslogar Usuario
+        Auth::logout();
+        return redirect()->route("gerals.index");
+        
+    }
+
+
+---------------TENTANDO TIRAR O ERRO
+-----VAMOS MODEL USUARIOS E CRIAREMOS UM METODO setloginAttribute
+
+ public function setloginAttribute($Login)
+   {
+      /* vai tirar os pontos e vazios e colaca o numero 
+      123.455.566-56 ...fica 12345556656  */
+
+      $value = preg_replace ("/[^0-9]/", "" , $Login  );
+      $this->attributes["Login"] = $value;
+       
+   }
+
+----E LEVAMOS PARA  METODO LOGAR NO UsuarioController POIS ESTA COM O LOGIM COM PONTOS
+class UsuarioController extends Controller
+{
+    public function logar(Request $request)
+    {
+        $data = [];
+
+        //Condicionamos, se o usuario entrar nessa condição é porqie apertou o botão
+        if($request->isMethod("POST")  ) {
+            //Regstar os dados do usuario (login e senha digitada)
+            $login= $request->input("login");
+            $senha= $request->input("senha");
+
+
+             /* vai tirar os pontos e vazios e colaca o numero 
+             123.455.566-56 ...fica 12345556656  */
+            $login = preg_replace ("/[^0-9]/", "" , $Login  );
+
+            
+            //Criar uma Variavel tipo array e coloca os dados dentro ---- senha espera password
+            $credencial = ['login' => $login, 'password' => $senha];
+            //Vamos LOGAR
+            if(Auth::attempt($credencial)) {
+                /*testar
+
+                
+               return view('admin.pages.produtos.index');
+                //return redirect()->route("produtos.index");
+                */
+                 dd("logado");
+                }else{
+                 /*testar    
+                
+                   
+                    $request->session()->flash("err", "Seha ou usuario Invalido");
+                    return redirect()->route("logar");
+                        */
+                        dd("Login Invalido");
+                }
+
+        }
+
+        return view('admin.pages.clientes.logar', $data);
+    }
+
+    --------VAMOS NA VIEW CLientes.Logar e colocar id="cpf" no Login
+
+@extends("layout")
+@section("conteudo")
+
+        <div class="col-12">
+        <h2 class="mb-6">Logar no Sistema</h2>
+        
+        <form action="{{route('logar')}}" method="post"> 
+        @csrf
+        <div class="form-group">
+        Login: <input type="text" name="login" id="cpf" class="form-control"><br>
+        </div>
+
+        <div class="form-group">
+        Senha: <input type="password" name="senha" class="form-control"><br>
+        </div>
+        <input type="submit" value="Logar" class="btn btn-primary ">
+    
+        </form >
+        
+        </div>
+
+
+
+@endsection
+
+
+118 ---AULA 20---FINALIZAR CARRINHO
+
+-----CODIFICAR AS MODEL DO pedido e itens_pedidos TIRANDO DA RModel
+---PEDIDO
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Pedido extends Model
+{
+      // a tabel a que vai apontar é para tabela produtos
+   protected $table= "pedidos";
+   //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+   protected $fillable = ['datapedido', 'status','usuario_id'];
+}
+
+---itens_pedidos
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class ItensPedido extends Model
+{
+     // a tabel a que vai apontar é para tabela produtos
+     protected $table= "itens_pedidos";
+     //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+     protected $fillable = ['quantidade', 'valor','dt_item','produto_id','pedido_id'];
+}
+
+
+
+----VAMOS CRIAR MAIS UMA ROTA E ESSA VAI SER TIPO POST 
+//ROTA FINALIZAR CARRINHO
+Route::post('/carrinho/finalizar', [ProdutoController::class, 'finalizar'])->name('carrinho_finalizar');
+
+
+----E NA View produtos.carrinho e colocar um formulario abaixo da table e um footer dentro 
+<form method="post" action="{{route('carrinho_finalizar')}}" >
+    @csrf
+    <input type="submit"  value="Finalizar Compra" class="btn btn-lg btn-primary" >
+
+</form>
+
+----ALEM DISSO ACIMA DO @foreach um CONTADOR (total ) em @php e dentro DO @foreach a somatario do contador
+e IMPROMOR NO Total
+
+  <tbody>
+                @php $total=0; @endphp
+            @foreach($cart as $indice => $item)
+                  <tr>
+                      <td>
+                          <a  href="{{route('carrinho_excluir', ['indice' => $indice])}}" class="btn btn-sm btn-primary"> <i class="fas fa-trash-alt"></i> </a>
+                      </td>
+
+                      <td>{{ $item->nome }}</td>
+                      <td><img src= " {{asset($item->foto) }}" width="50"  heigth="50" /></td>
+                      <td>{{ $item->valor }}</td>
+                      <td>{{ $item->descricao }}</td>
+                 </tr>
+                 @php $total += $item->valor; @endphp
+                 @endforeach  
+             </tbody>
+
+            <footer>
+                    <tr>
+                      <td colspan="S">
+                        Total do carrinho : R$ {{ $total }}
+                      </td>
+                    </tr>
+             </footer>
+
+
+ ---PAGINA FICA ASSIM ABAIXO
+
+@extends("layout")
+@section("conteudo")
+  
+
+<table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Nome</th>
+                    <th>Foto</th>
+                    <th>Valor</th>
+                    <th>Descrição</th>
+                </tr>
+
+            </thead>
+            <tbody>
+            <tbody>
+                @php $total=0; @endphp
+            @foreach($cart as $indice => $item)
+                  <tr>
+                      <td>
+                          <a  href="{{route('carrinho_excluir', ['indice' => $indice])}}" class="btn btn-sm btn-primary"> <i class="fas fa-trash-alt"></i> </a>
+                      </td>
+
+                      <td>{{ $item->nome }}</td>
+                      <td><img src= " {{asset($item->foto) }}" width="50"  heigth="50" /></td>
+                      <td>{{ $item->valor }}</td>
+                      <td>{{ $item->descricao }}</td>
+                 </tr>
+                 @php $total += $item->valor; @endphp
+                 @endforeach  
+             </tbody>
+
+            <footer>
+                    <tr>
+                      <td colspan="S">
+                        Total do carrinho : R$ {{ $total }}
+                      </td>
+                    </tr>
+             </footer>
+
+
+</table>
+
+<form method="post" action="{{route('carrinho_finalizar')}}" >
+    @csrf
+    <input type="submit"  value="Finalizar Compra" class="btn btn-lg btn-primary" >
+
+</form>
+
+@endsection
+
+----AGORA VAMOS EM ProdutoController CRIAMOS UM METODO FINALIZAR
+
+-----ANTES VAMOS EM SERVICES e CRIA UM Services.VendaService ONDE VAMOS COLOCAR A LOGICA DA VendaService
+
+---Cria um classe finalizarvenda  dentro do VendaService que pede uma array de produtos e um usaurio
+
+<?php
+
+namespace App\Services;
+use App\Models\Usuario;
+use App\Models\Endereco;
+use Log;
+
+class VendaService  {
+
+
+
+public function finalizarVenda($prods - [], Usuario $user)
+    {
+      
+        
+    }
+
+}
+
+-----VAI NO ProdutoController -- COLOCA (declara) LA EM CIMA A Classe Use App\Services\VendaService;
+ public function finalizar(Request $request)
+            {
+
+               
+                /* BUSCAR CARRINHO -  Pega o carrino
+                $carrinho = session('cart', []);
+                OS produto do carrinho vou chamar de Prods*/
+                $prods = session('cart', []);
+
+                $vendaService = new VendaService();
+                 /* Passar os produtos e usuario logado  */
+                $vendaService = new finalizarVenda( $prods, \Auth::user());
+
+
+               return redirect()->route('ver_carrinho');
+                    
+            }
+
+ ---VOLTA NA Classe ServiceVenda e vamos fazer um tratamento co try...catch   E DELARAR LA EM CIMA AS CLASSE PEDIDO E ITEM_PEDIDO      
+ use App\Models\Pedido;
+use App\Models\Itens_pedido;
+
+--FICA ASSIM
+ <?php
+
+namespace App\Services;
+use App\Models\Usuario;
+use App\Models\Endereco;
+use Log;
+
+use App\Models\Pedido;
+use App\Models\ItensPedido;
+
+
+class VendaService  {
+
+// O USARIO TEM QUE ESTA LOGADO SE NAO DAR ERRO (assim tem que suprimir o Usuario $user)
+public function finalizarVenda($prods = [] , Usuario $user )
+    {
+      try {
+
+        \DB::beginTransaction();                // Inicar a transação
+        $dthoje = new \DateTime();
+        $pedido = new Pedido();
+        $pedido -> datapedido = $dthoje -> format("y-m-d H:i:s");
+        $pedido -> status = "PEN";
+        $pedido -> usuario_id = $user->id;
+        $pedido->save();
+        
+
+        foreach($prods as $item) {
+        $itens = new ItensPedido();
+        $itens->quantidade= 1;
+        $itens->valor= $item->valor;
+        $itens->dt_item= $dthoje -> format("y-m-d H:i:s");
+        $itens->produto_id= $item->id;
+        $itens->pedido_id= $pedido->id;
+        $itens->save();
+        }
+
+        \DB::commit();                           // Confirmando a transação
+        return [ 'status' => 'ok', 'message' => 'Venda  Finalizada' ];
+
+      }catch(\exception $e){
+        \DB::rollBack();
+        Log::error("ERRO:VENDA SERVICE",  ['message'=> $e -> getMessage()]);
+
+            return [ 'status' => 'err', 'message' => 'Venda não pode ser Finalizada' ];
+
+
+      }
+
+
+
+        
+    }
+
+}
+
+
+-------VOLTA PARA Produto controle e pegar o resultr da vendaService
+ public function finalizar(Request $request)
+            {
+
+               
+                /* BUSCAR CARRINHO -  Pega o carrino
+                $carrinho = session('cart', []);
+                OS produto do carrinho vou chamar de Prods*/
+                $prods = session('cart', []);
+
+                //CRIAR UM NOVA VENDA
+                $vendaService = new VendaService();
+                 /* Passar os produtos e usuario logado  */
+                //$vendaService -> finalizarVenda( $prods, \Auth::user()); PEGAR O Result fessa venda
+                $result = $vendaService ->  finalizarVenda( $prods, \Auth::user());
+                //e faz um requsete condicionado ao status
+
+                if ($result["status"] == "ok" ){               
+                    
+                    $request->session()->forget("cart");
+                
+                }
+
+                $request->session()->flash($result["status"], $result["message"]);
+               return redirect()->route('ver_carrinho');
+                    
+            }
+
+
+=--------ESTA DANDO VENDA NÂO FINALIZADA, POIS USUARIO NÂO ESTA LOGADO
+
+
+
+119-----AULA 21 ---HISTORICO DE Compra
+
+---No LAYOUT VAMOS COLOCAR UM LINK DE Compra_historico PARA QUEM TIVER LOGADO
+
+ @if(!\Auth::User())
+        <li class="breadcrumb-item active"><a href="{{ route('logar') }}" class="active">Logar</a></li>
+        @else
+        <li class="breadcrumb-item active"><a href="{{ route('compra_historico') }}" class="active">Minhas Compras</a></li>
+        <li class="breadcrumb-item active"><a href="{{ route('sair') }}" class="active">Logout</a></li>
+        @endif
+
+
+----VAMOS FAZER A ROTA
+      //ROTA FINALIZAR CARRINHO
+Route::post('/carrinho/finalizar', [ProdutoController::class, 'finalizar'])->name('carrinho_finalizar');
+
+//ROTA HISRORICO DE COMPRAS
+Route::match (['get', 'post'],'/compras/historico', [ProdutoController::class, 'historico'])->name('compra_historico');
+
+---E CRIAR NO ProdutoController O METODO historico
+--DECLARAR (importar a lista de pedido) LA EM CIMA NA CLASS PEDIDO
+use App\Models\Pedido;
+public function historico()
+            {
+                $data = [];
+                 //pegar id do usuario logado
+                $idusuario = \Auth::user()->id;
+                //Busca a lista de pedido pelo  id do usuario 
+                $listaPedido = Pedido::where("usuario_id", $idusuario)
+                                  ->orderBy("datapedido","desc")
+                                  ->get();
+
+               //faz a lista de pedido e coloca na variavel data
+               $data["lista"] = $listaPedido;
+ 
+                 return view('admin.pages.compras.historico', $data);
+               
+            }
+
+
+---E FAZER A VIEW historico DENTRO DO DIRETORIO Compras (compras.historico) 
+PEGANDO A lista por um @foreach dentro da tabela
+@extends("layout")
+@section("conteudo")
+
+<div class="col-12">
+<h2>   MINHA COMPRAS    </h2>
+</div >
+
+<div class="col-12">
+<table class="table table-bordered " > 
+
+    <tr>
+        <th>Data da Compra </th>
+        <th>Situação </th>
+        <th> </th>
+     </tr >
+    @foreach ($lista as $ped)
+    <tr>
+        <td>"{{ $ped->datapedido }} </td>
+        <td>"{{ $ped->status }} </td>
+        <td> </td>
+     </tr >
+
+
+    @endforeach
+
+</table >
+</div >
+
+@endsection
+
+
+-----FUNCIONANDO ,VAMOS MELHORAR
+
+--VAMOS NA MODEL PEDIDO E FALA QUE O ATRIBUTO database DO TIPO DATE
+
+lass Pedido extends Model
+{
+      // a tabel a que vai apontar é para tabela produtos
+   protected $table= "pedidos";
+   //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+   protected $fillable = ['datapedido', 'status','usuario_id'];
+   protected $dates=  ['datapedido'];
+}
+
+
+---E FORMATA datapedido LA na view historico com format 
+
+@foreach ($lista as $ped)
+    <tr>
+        <td>"{{ $ped->datapedido->format("d/m/Y H:i") }} </td>
+        <td>"{{ $ped->status }} </td>
+        <td> </td>
+     </tr >
+
+------- E A SITUAÇÂO , VAMOS EM MODEL Pedido e CRIAR UMA function statusDesc (descrição do status)
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Pedido extends Model
+{
+      // a tabel a que vai apontar é para tabela produtos
+   protected $table= "pedidos";
+   //quais campos vai ser inseridos na tabela , ja que em RModel esta nulo por padrão
+   protected $fillable = ['datapedido', 'status','usuario_id'];
+   protected $dates=  ['datapedido'];
+
+   public function statusDesc()
+   {
+      // Declara descrição vazia 
+       $desc = "";
+       // abre um switch e pergunta para ele
+       switch( $this->status) {
+          case'PEN' : $desc = "PENDENTE";break
+          case'APR' : $desc = "APROVADO";break
+          case'CAN' : $desc = "CANCELADO";break
+
+
+       }
+       
+   }
+
+}
+
+------E VAMOS NA View historico e substitui status por statusDesc
+@extends("layout")
+@section("conteudo")
+
+<div class="col-12">
+<h2>   MINHA COMPRAS    </h2>
+</div >
+
+<div class="col-12">
+<table class="table table-bordered " > 
+
+    <tr>
+        <th>Data da Compra </th>
+        <th>Situação </th>
+        <th> </th>
+     </tr >
+    @foreach ($lista as $ped)
+    <tr>
+        <td>"{{ $ped->datapedido->format("d/m/Y H:i") }} </td>
+        <td>"{{ $ped->statusDesc () }} </td>
+        <td> </td>
+     </tr >
+
+
+    @endforeach
+
+</table >
+</div >
+
+@endsection
+
+
+120----AULA 22------
 
 
 
